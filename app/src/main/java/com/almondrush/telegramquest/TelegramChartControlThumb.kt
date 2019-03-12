@@ -48,6 +48,8 @@ internal class TelegramChartControlThumb @JvmOverloads constructor(
 
     private var tracking = Trackable.NOTHING
 
+    private var touchOffsetFromCenter = 0F
+
     private fun setTimeRange(start: Int = timeRange.start, end: Int = timeRange.endInclusive) {
         timeRange = start..end
     }
@@ -60,15 +62,73 @@ internal class TelegramChartControlThumb @JvmOverloads constructor(
     }
 
     private fun setLeftThumbTo(x: Float) {
-        val positionPx = Math.max(x - thumbWidth / 2, drawingRect.left)
-        val timeValue = positionPx / pixelsPerTimeRange
-        setTimeRange(start = timeValue.toInt())
+        val dxLeftThumb = (x - thumbWidth / 2) - timeRangePixels.start
+        L.d(dxLeftThumb)
+        calculateAndSet(dxLeftThumb, 0F, true)
     }
 
     private fun setRightThumbTo(x: Float) {
-        val positionPx = Math.min(x + thumbWidth / 2, drawingRect.right)
-        val timeValue = positionPx / pixelsPerTimeRange
-        setTimeRange(end = timeValue.toInt())
+        val dxRightThumb = (x + thumbWidth / 2) - timeRangePixels.endInclusive
+        calculateAndSet(0F, dxRightThumb, true)
+    }
+
+    private fun shiftFrame(x: Float) {
+        val oldX = getFrameCenter() + touchOffsetFromCenter
+        val dx = x - oldX
+        calculateAndSet(dx, dx, false)
+    }
+
+    private fun calculateAndSet(dxLeftThumb: Float, dxRightThumb: Float, allowResize: Boolean) {
+        val (leftPosition, rightPosition) = calculatePositions(dxLeftThumb, dxRightThumb, allowResize)
+        setTimeRange(
+            (leftPosition / pixelsPerTimeRange).roundToInt(),
+            (rightPosition / pixelsPerTimeRange).roundToInt()
+        )
+    }
+
+    private fun calculatePositions(dxLeftThumb: Float, dxRightThumb: Float, allowResize: Boolean): Pair<Float, Float> {
+        val minLeftThumbX = drawingRect.left
+        val maxRightThumbX = drawingRect.right
+
+        val minLenghtPx = TimeRange.MIN_LENGTH * pixelsPerTimeRange
+
+        var measuredLeftThumbX = timeRangePixels.start + dxLeftThumb
+        var measuredRightThumbX = timeRangePixels.endInclusive + dxRightThumb
+
+        var resultLeftThumbX = Math.max(measuredLeftThumbX, minLeftThumbX)
+        var resultRightThumbX = Math.min(measuredRightThumbX, maxRightThumbX)
+
+        if (!allowResize) {
+            when {
+                // left out of border
+                measuredLeftThumbX < minLeftThumbX -> resultRightThumbX += minLeftThumbX - measuredLeftThumbX
+                // right out of border
+                measuredRightThumbX > maxRightThumbX -> resultLeftThumbX -= measuredRightThumbX - maxRightThumbX
+            }
+        }
+
+        val length = resultRightThumbX - resultLeftThumbX
+
+        if (length < minLenghtPx) {
+            val lengthDiff = minLenghtPx - length
+
+            when {
+                dxLeftThumb > 0 -> {
+                    // moving to the right
+                    measuredRightThumbX = resultRightThumbX + lengthDiff
+                    resultRightThumbX = Math.min(measuredRightThumbX, maxRightThumbX)
+                    resultLeftThumbX -= measuredRightThumbX - resultRightThumbX
+                }
+                dxRightThumb < 0 -> {
+                    // moving to the left
+                    measuredLeftThumbX = resultLeftThumbX - lengthDiff
+                    resultLeftThumbX = Math.max(measuredLeftThumbX, minLeftThumbX)
+                    resultRightThumbX += resultLeftThumbX - measuredLeftThumbX
+                }
+            }
+        }
+
+        return resultLeftThumbX to resultRightThumbX
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
@@ -79,51 +139,58 @@ internal class TelegramChartControlThumb @JvmOverloads constructor(
         updateTimeRangePx()
     }
 
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        return when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN -> {
-                onActionDown(event.x)
-                true
-            }
-            MotionEvent.ACTION_MOVE ->{
-                onActionMove(event.x)
-                true
-            }
-            else -> super.onTouchEvent(event)
+    override fun onTouchEvent(event: MotionEvent): Boolean = when (event.actionMasked) {
+        MotionEvent.ACTION_DOWN -> {
+            onActionDown(event)
+            true
         }
+        MotionEvent.ACTION_MOVE -> {
+            onActionMove(event)
+            true
+        }
+        else -> super.onTouchEvent(event)
     }
 
-    private fun onActionDown(x: Float) {
+    private fun onActionDown(event: MotionEvent) {
+        val eventX = event.x
         val leftThumbStart = timeRangePixels.start
         val leftThumbEnd = timeRangePixels.start + thumbWidth
         val rightThumbStart = timeRangePixels.endInclusive - thumbWidth
         val rightThumbEnd = timeRangePixels.endInclusive
 
-        L.d(x)
+        L.d(eventX)
         L.d("$leftThumbStart..$leftThumbEnd $rightThumbStart..$rightThumbEnd")
 
         tracking = when {
-            x < leftThumbStart -> {
-                setLeftThumbTo(x)
+            eventX < leftThumbStart -> {
+                setLeftThumbTo(eventX)
                 Trackable.LEFT_THUMB
             }
-            x <= leftThumbEnd -> Trackable.LEFT_THUMB
-            x < rightThumbStart -> Trackable.FRAME
-            x <= rightThumbEnd -> Trackable.RIGHT_THUMB
+            eventX <= leftThumbEnd -> Trackable.LEFT_THUMB
+            eventX < rightThumbStart -> {
+                touchOffsetFromCenter = event.x - getFrameCenter()
+                Trackable.FRAME
+            }
+            eventX <= rightThumbEnd -> Trackable.RIGHT_THUMB
             else -> {
-                setRightThumbTo(x)
+                setRightThumbTo(eventX)
                 Trackable.RIGHT_THUMB
             }
         }
         L.d(tracking)
     }
 
-    private fun onActionMove(x: Float) {
-        L.d(x)
+    private fun getFrameCenter() = (timeRangePixels.start to timeRangePixels.endInclusive).center()
+
+    private fun onActionMove(event: MotionEvent) {
+        L.d(event.x)
         L.d(tracking)
         when (tracking) {
-            Trackable.LEFT_THUMB -> setLeftThumbTo(x)
-            Trackable.RIGHT_THUMB -> setRightThumbTo(x)
+            Trackable.LEFT_THUMB -> setLeftThumbTo(event.x)
+            Trackable.RIGHT_THUMB -> setRightThumbTo(event.x)
+            Trackable.FRAME -> {
+                shiftFrame(event.x)
+            }
         }
     }
 

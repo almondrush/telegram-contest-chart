@@ -48,7 +48,9 @@ class TelegramChartView @JvmOverloads constructor(
     }
 
     fun setTimeRange(range: IntRange) {
-        require(TimeRange.MIN <= range.first && range.last <= TimeRange.MAX)
+        require(TimeRange.MIN <= range.first && range.last <= TimeRange.MAX) {
+            "Wrong range: $range. Allowed range: ${TimeRange.FULL}."
+        }
         timeRange = range
         shouldUpdate = true
         invalidate()
