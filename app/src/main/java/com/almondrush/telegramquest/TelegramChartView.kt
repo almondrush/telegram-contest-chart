@@ -19,11 +19,6 @@ class TelegramChartView @JvmOverloads constructor(
     defStyleRes: Int = 0
 ) : View(context, attrs, defStyleAttr, defStyleRes) {
 
-    companion object {
-        const val TIME_RANGE_MIN = 0
-        const val TIME_RANGE_MAX = 100
-    }
-
     private val paint = Paint()
     private val path = Path()
     private val pathRect: Rect = Rect()
@@ -32,7 +27,7 @@ class TelegramChartView @JvmOverloads constructor(
 
     private var shouldUpdate: Boolean = true
 
-    private var timeRange: IntRange = TIME_RANGE_MIN..TIME_RANGE_MAX
+    private var timeRange: IntRange = TimeRange.FULL
 
     private var lines: List<Line> = emptyList()
     private var linesPx: List<LinePx> = emptyList()
@@ -53,7 +48,7 @@ class TelegramChartView @JvmOverloads constructor(
     }
 
     fun setTimeRange(range: IntRange) {
-        require(TIME_RANGE_MIN <= range.first && range.last <= TIME_RANGE_MAX)
+        require(TimeRange.MIN <= range.first && range.last <= TimeRange.MAX)
         timeRange = range
         shouldUpdate = true
         invalidate()
@@ -113,8 +108,8 @@ class TelegramChartView @JvmOverloads constructor(
     private fun fitValuesIntoRange(values: List<PointL>, selectedRange: IntRange): List<PointL> {
         val timeInterval = values.last().x - values.first().x
 
-        val startTime = values.first().x + timeInterval * selectedRange.start / TIME_RANGE_MAX
-        val endTime = values.last().x - timeInterval * (TIME_RANGE_MAX - selectedRange.endInclusive) / TIME_RANGE_MAX
+        val startTime = values.first().x + timeInterval * selectedRange.start / TimeRange.MAX
+        val endTime = values.last().x - timeInterval * (TimeRange.MAX - selectedRange.endInclusive) / TimeRange.MAX
 
         var rangedValues = values.filter { it.x in startTime..endTime }
 
