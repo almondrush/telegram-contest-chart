@@ -19,28 +19,38 @@ class TelegramChartView @JvmOverloads constructor(
     private val data = testData
     private val timeRange: IntRange = 0 until 100
 
-    private var pathRect = Rect(0, 0, width, height)
+    private var pathRect: Rect = Rect()
 
     init {
-        paint.setARGB(255, 255, 0, 0)
+        paint.style = Paint.Style.STROKE
         paint.strokeWidth = 5F
+    }
+
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        pathRect.set(0, measuredHeight, measuredWidth, 0)
     }
 
     override fun onDraw(canvas: Canvas) {
         measureTimeMillis {
+            d("pathRect: $pathRect")
+
             val xValues = timeDataToPixelValues(data.timeData, pathRect)
             val yValuesList = linesDataToPixelValues(data.lines, pathRect)
+
+            d(xValues.toList().toString())
 
             yValuesList.forEachIndexed { lineIndex, yValues ->
                 path.rewind()
                 paint.color = Color.parseColor(data.lines[lineIndex].color)
                 path.moveTo(xValues[0], yValues[0])
                 for (i in 1 until xValues.size) path.lineTo(xValues[i], yValues[i])
+                path.moveTo(xValues[0], yValues[0])
                 canvas.drawPath(path, paint)
             }
 
         }.let {
-            Log.v("ESTIMATE", "Estimate draw: $it")
+            Log.v("CHART_ESTIMATE", "Estimate draw: $it")
         }
     }
 
@@ -48,7 +58,7 @@ class TelegramChartView @JvmOverloads constructor(
         val startXPixel = pathRect.left
         val endXPixel = pathRect.right
         val xPixelCount = endXPixel - startXPixel
-        val pixelsPerTime = xPixelCount.toFloat() / (timeRange.endInclusive - timeRange.start).toFloat()
+        val pixelsPerTime = xPixelCount.toFloat() / (timeData.last() - timeData.first()).toFloat()
 
         return Array(timeData.size) { i ->
             (timeData[i] - timeData[0]) * pixelsPerTime
@@ -56,8 +66,8 @@ class TelegramChartView @JvmOverloads constructor(
     }
 
     private fun linesDataToPixelValues(lines: List<ChartLine>, pathRect: Rect): List<Array<Float>> {
-        val startYPixel = pathRect.left
-        val endYPixel = pathRect.right
+        val startYPixel = pathRect.bottom
+        val endYPixel = pathRect.top
         val yPixelCount = endYPixel - startYPixel
 
         val (minYValue, maxYValue) = findMinAndMaxValues(lines)
@@ -66,7 +76,7 @@ class TelegramChartView @JvmOverloads constructor(
 
         return lines.map { line ->
             Array(line.data.size) { i ->
-                (line.data[i] - minYValue) * pixelsPerValue
+                pathRect.top - ((line.data[i] - minYValue) * pixelsPerValue)
             }
         }
     }
@@ -82,5 +92,7 @@ class TelegramChartView @JvmOverloads constructor(
     }.reduce { (oldMin, oldMax), (currentMin, currentMax) ->
         Math.min(oldMin, currentMin) to Math.max(oldMax, currentMax)
     }
+
+    fun d(t: String) =  Log.d("CHART_VIEW", t)
 
 }
