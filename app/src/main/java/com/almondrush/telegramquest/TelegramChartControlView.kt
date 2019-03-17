@@ -3,6 +3,7 @@ package com.almondrush.telegramquest
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
+import com.almondrush.telegramquest.dto.Line
 
 class TelegramChartControlView @JvmOverloads constructor(
     context: Context,
@@ -11,20 +12,23 @@ class TelegramChartControlView @JvmOverloads constructor(
     defStyleRes: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr, defStyleRes) {
 
-    private val childChart = TelegramChartView(context, attrs, defStyleAttr, defStyleRes)
-    private val thumb = TelegramChartControlThumb(context, attrs, defStyleAttr, defStyleRes)
+    private val chart = TelegramChartView(context, attrs, defStyleAttr, defStyleRes)
+    private val thumb = TelegramChartControlThumbView(context, attrs, defStyleAttr, defStyleRes)
 
     init {
-        addView(childChart)
+        addView(chart)
         addView(thumb)
     }
 
-    fun setListener(listener: TimeRangeUpdatedListener) {
-        thumb.timeRangeUpdatedListener = listener
+    fun setListener(listener: XRangeUpdatedListener) {
+        thumb.xRangeUpdatedListener = listener
     }
 
+    fun setLines(lines: List<Line>) {
+        chart.setData(lines, maxY = ChartUtil.findMaxYValue(lines))
+    }
 
-    interface TimeRangeUpdatedListener {
-        fun onTimeRangeUpdated(timeRange: IntRange)
+    interface XRangeUpdatedListener {
+        fun onXRangeUpdated(timeRange: IntRange)
     }
 }

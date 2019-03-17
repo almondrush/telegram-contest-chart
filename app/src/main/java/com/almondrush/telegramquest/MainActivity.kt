@@ -9,12 +9,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val chartView: TelegramChartView = findViewById(R.id.chart_view)
+        val chartView: TelegramChartWithLegendView = findViewById(R.id.chart_view)
         val controlView: TelegramChartControlView = findViewById(R.id.chart_control)
 
-        controlView.setListener(object: TelegramChartControlView.TimeRangeUpdatedListener {
-            override fun onTimeRangeUpdated(timeRange: IntRange) {
-                chartView.setTimeRange(timeRange)
+        chartView.setLines(testLines)
+        controlView.setLines(testLines)
+
+
+        controlView.setListener(object: TelegramChartControlView.XRangeUpdatedListener {
+            override fun onXRangeUpdated(timeRange: IntRange) {
+                chartView.setXRange(timeRange)
             }
         })
     }

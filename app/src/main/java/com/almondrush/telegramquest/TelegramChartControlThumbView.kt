@@ -9,10 +9,11 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import com.almondrush.center
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
-internal class TelegramChartControlThumb @JvmOverloads constructor(
+internal class TelegramChartControlThumbView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet,
     defStyleAttr: Int = 0,
@@ -25,19 +26,19 @@ internal class TelegramChartControlThumb @JvmOverloads constructor(
     private val paint = Paint()
     private val path = Path()
 
-    internal var timeRangeUpdatedListener: TelegramChartControlView.TimeRangeUpdatedListener? = null
+    internal var xRangeUpdatedListener: TelegramChartControlView.XRangeUpdatedListener? = null
 
-    private var timeRange by Delegates.observable(300..500) { _, oldValue, newValue ->
+    private var xRange by Delegates.observable(XRange.FULL) { _, oldValue, newValue ->
         if (oldValue != newValue) {
-            updateTimeRangePx()
-            timeRangeUpdatedListener?.onTimeRangeUpdated(newValue)
+            updateXRangePx()
+            xRangeUpdatedListener?.onXRangeUpdated(newValue)
             invalidate()
         }
     }
 
-    private lateinit var timeRangePixels: IntRange
+    private lateinit var xRangePixels: IntRange
 
-    private var pixelsPerTimeRange: Float = 0F
+    private var pixelsPerXRangeUnit: Float = 0F
 
     private var frameWidth = 4
     private var thumbWidth = 16
@@ -50,25 +51,25 @@ internal class TelegramChartControlThumb @JvmOverloads constructor(
 
     private var touchOffsetFromCenter = 0F
 
-    private fun setTimeRange(start: Int = timeRange.start, end: Int = timeRange.endInclusive) {
-        timeRange = start..end
+    private fun setXRange(start: Int = xRange.start, end: Int = xRange.endInclusive) {
+        xRange = start..end
     }
 
-    private fun updateTimeRangePx() {
-        if (pixelsPerTimeRange == 0F) return
-        val start = (timeRange.first * pixelsPerTimeRange).roundToInt()
-        val end = (timeRange.endInclusive * pixelsPerTimeRange).roundToInt()
-        timeRangePixels = start..end
+    private fun updateXRangePx() {
+        if (pixelsPerXRangeUnit == 0F) return
+        val start = (xRange.first * pixelsPerXRangeUnit).roundToInt()
+        val end = (xRange.endInclusive * pixelsPerXRangeUnit).roundToInt()
+        xRangePixels = start..end
     }
 
     private fun setLeftThumbTo(x: Float) {
-        val dxLeftThumb = (x - thumbWidth / 2) - timeRangePixels.start
+        val dxLeftThumb = (x - thumbWidth / 2) - xRangePixels.start
         L.d(dxLeftThumb)
         calculateAndSet(dxLeftThumb, 0F, true)
     }
 
     private fun setRightThumbTo(x: Float) {
-        val dxRightThumb = (x + thumbWidth / 2) - timeRangePixels.endInclusive
+        val dxRightThumb = (x + thumbWidth / 2) - xRangePixels.endInclusive
         calculateAndSet(0F, dxRightThumb, true)
     }
 
@@ -80,9 +81,9 @@ internal class TelegramChartControlThumb @JvmOverloads constructor(
 
     private fun calculateAndSet(dxLeftThumb: Float, dxRightThumb: Float, allowResize: Boolean) {
         val (leftPosition, rightPosition) = calculatePositions(dxLeftThumb, dxRightThumb, allowResize)
-        setTimeRange(
-            (leftPosition / pixelsPerTimeRange).roundToInt(),
-            (rightPosition / pixelsPerTimeRange).roundToInt()
+        setXRange(
+            (leftPosition / pixelsPerXRangeUnit).roundToInt(),
+            (rightPosition / pixelsPerXRangeUnit).roundToInt()
         )
     }
 
@@ -90,10 +91,10 @@ internal class TelegramChartControlThumb @JvmOverloads constructor(
         val minLeftThumbX = drawingRect.left
         val maxRightThumbX = drawingRect.right
 
-        val minLenghtPx = TimeRange.MIN_LENGTH * pixelsPerTimeRange
+        val minLenghtPx = XRange.MIN_LENGTH * pixelsPerXRangeUnit
 
-        var measuredLeftThumbX = timeRangePixels.start + dxLeftThumb
-        var measuredRightThumbX = timeRangePixels.endInclusive + dxRightThumb
+        var measuredLeftThumbX = xRangePixels.start + dxLeftThumb
+        var measuredRightThumbX = xRangePixels.endInclusive + dxRightThumb
 
         var resultLeftThumbX = Math.max(measuredLeftThumbX, minLeftThumbX)
         var resultRightThumbX = Math.min(measuredRightThumbX, maxRightThumbX)
@@ -135,8 +136,8 @@ internal class TelegramChartControlThumb @JvmOverloads constructor(
         super.onLayout(changed, left, top, right, bottom)
         drawingRect.set(0F, 0F, measuredWidth.toFloat(), measuredHeight.toFloat())
 
-        pixelsPerTimeRange = measuredWidth.toFloat() / TimeRange.MAX
-        updateTimeRangePx()
+        pixelsPerXRangeUnit = measuredWidth.toFloat() / XRange.MAX
+        updateXRangePx()
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean = when (event.actionMasked) {
@@ -153,10 +154,10 @@ internal class TelegramChartControlThumb @JvmOverloads constructor(
 
     private fun onActionDown(event: MotionEvent) {
         val eventX = event.x
-        val leftThumbStart = timeRangePixels.start
-        val leftThumbEnd = timeRangePixels.start + thumbWidth
-        val rightThumbStart = timeRangePixels.endInclusive - thumbWidth
-        val rightThumbEnd = timeRangePixels.endInclusive
+        val leftThumbStart = xRangePixels.start
+        val leftThumbEnd = xRangePixels.start + thumbWidth
+        val rightThumbStart = xRangePixels.endInclusive - thumbWidth
+        val rightThumbEnd = xRangePixels.endInclusive
 
         L.d(eventX)
         L.d("$leftThumbStart..$leftThumbEnd $rightThumbStart..$rightThumbEnd")
@@ -180,7 +181,7 @@ internal class TelegramChartControlThumb @JvmOverloads constructor(
         L.d(tracking)
     }
 
-    private fun getFrameCenter() = (timeRangePixels.start to timeRangePixels.endInclusive).center()
+    private fun getFrameCenter() = (xRangePixels.start to xRangePixels.endInclusive).center()
 
     private fun onActionMove(event: MotionEvent) {
         L.d(event.x)
@@ -196,9 +197,9 @@ internal class TelegramChartControlThumb @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         outerRect.set(
-            drawingRect.width() * timeRange.start / TimeRange.MAX,
+            drawingRect.width() * xRange.start / XRange.MAX,
             0F,
-            drawingRect.width() * timeRange.endInclusive / TimeRange.MAX,
+            drawingRect.width() * xRange.endInclusive / XRange.MAX,
             drawingRect.bottom
         )
         innerRect.set(
@@ -229,12 +230,4 @@ internal class TelegramChartControlThumb @JvmOverloads constructor(
         NOTHING, LEFT_THUMB, RIGHT_THUMB, FRAME
     }
 
-}
-
-fun Pair<Number, Number>.center(): Float {
-    val a = first.toFloat()
-    val b = second.toFloat()
-    val min = Math.min(a, b)
-    val max = Math.max(a, b)
-    return min + (max - min) / 2
 }

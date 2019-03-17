@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <com.almondrush.telegramquest.TelegramChartView
+    <com.almondrush.telegramquest.TelegramChartWithLegendView
         android:id="@+id/chart_view"
         android:layout_width="match_parent"
         android:layout_height="236dp"
