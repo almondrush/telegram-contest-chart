@@ -7,11 +7,9 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
-import kotlin.math.max
-import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
-class TelegramChartValueAxisView @JvmOverloads constructor(
+class ChartValueAxisView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet,
     defStyleAttr: Int = 0,
@@ -32,8 +30,6 @@ class TelegramChartValueAxisView @JvmOverloads constructor(
     private val nonZeroLineCount = 5
 
     private var maxY = 0L
-
-    private val roundingValue = 50
 
     init {
         linePaint.style = Paint.Style.STROKE

@@ -12,7 +12,7 @@ import com.almondrush.telegramquest.dto.Line
 import com.almondrush.telegramquest.dto.LinePx
 import kotlin.system.measureTimeMillis
 
-class TelegramChartView @JvmOverloads constructor(
+class ChartView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet,
     defStyleAttr: Int = 0,

@@ -5,15 +5,15 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 import com.almondrush.telegramquest.dto.Line
 
-class TelegramChartWithLegendView @JvmOverloads constructor(
+class ChartWithLegendView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet,
     defStyleAttr: Int = 0,
     defStyleRes: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr, defStyleRes) {
 
-    private val chart = TelegramChartView(context, attrs, defStyleAttr, defStyleRes)
-    private val yAxisView = TelegramChartValueAxisView(context, attrs, defStyleAttr, defStyleRes)
+    private val chart = ChartView(context, attrs, defStyleAttr, defStyleRes)
+    private val yAxisView = ChartValueAxisView(context, attrs, defStyleAttr, defStyleRes)
 
     private var lines: List<Line> = emptyList()
 

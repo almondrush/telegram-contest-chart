@@ -13,7 +13,7 @@ import com.almondrush.center
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
-internal class TelegramChartControlThumbView @JvmOverloads constructor(
+internal class ChartControlThumbView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet,
     defStyleAttr: Int = 0,
@@ -26,7 +26,7 @@ internal class TelegramChartControlThumbView @JvmOverloads constructor(
     private val paint = Paint()
     private val path = Path()
 
-    internal var xRangeUpdatedListener: TelegramChartControlView.XRangeUpdatedListener? = null
+    internal var xRangeUpdatedListener: ChartControlView.XRangeUpdatedListener? = null
 
     private var xRange by Delegates.observable(XRange.FULL) { _, oldValue, newValue ->
         if (oldValue != newValue) {

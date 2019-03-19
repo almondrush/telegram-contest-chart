@@ -5,15 +5,15 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 import com.almondrush.telegramquest.dto.Line
 
-class TelegramChartControlView @JvmOverloads constructor(
+class ChartControlView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet,
     defStyleAttr: Int = 0,
     defStyleRes: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr, defStyleRes) {
 
-    private val chart = TelegramChartView(context, attrs, defStyleAttr, defStyleRes)
-    private val thumb = TelegramChartControlThumbView(context, attrs, defStyleAttr, defStyleRes)
+    private val chart = ChartView(context, attrs, defStyleAttr, defStyleRes)
+    private val thumb = ChartControlThumbView(context, attrs, defStyleAttr, defStyleRes)
 
     init {
         addView(chart)
