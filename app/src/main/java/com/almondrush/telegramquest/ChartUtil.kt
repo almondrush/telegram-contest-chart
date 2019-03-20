@@ -8,6 +8,12 @@ import com.almondrush.telegramquest.dto.PointL
 
 object ChartUtil {
 
+    fun getTimeRange(lines: List<Line>): LongRange {
+        val startTime = requireNotNull(lines.map { it.data.first() }.minBy { it.x }).x
+        val endTime = requireNotNull(lines.map { it.data.last() }.maxBy { it.x }).x
+        return startTime..endTime
+    }
+
     fun findMaxYValueRanged(lines: List<Line>, xRange: IntRange) = lines.mapNotNull {
         fitPointsIntoRange(it.data, xRange).maxBy(PointL::y)
     }.maxBy(PointL::y)?.y ?: 0

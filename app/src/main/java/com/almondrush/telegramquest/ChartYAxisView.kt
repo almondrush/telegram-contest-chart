@@ -9,7 +9,7 @@ import android.util.AttributeSet
 import android.view.View
 import kotlin.math.roundToLong
 
-class ChartValueAxisView @JvmOverloads constructor(
+class ChartYAxisView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet,
     defStyleAttr: Int = 0,
@@ -57,7 +57,6 @@ class ChartValueAxisView @JvmOverloads constructor(
     }
 
     override fun onDraw(canvas: Canvas) {
-        super.onDraw(canvas)
         val zeroLineOffset = (lineWidth / 2).takeIf { it > 1 } ?: 1
         canvas.apply {
             val valueHeight = textBottomMargin + textSize

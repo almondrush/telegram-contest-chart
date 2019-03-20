@@ -64,7 +64,6 @@ internal class ChartControlThumbView @JvmOverloads constructor(
 
     private fun setLeftThumbTo(x: Float) {
         val dxLeftThumb = (x - thumbWidth / 2) - xRangePixels.start
-        L.d(dxLeftThumb)
         calculateAndSet(dxLeftThumb, 0F, true)
     }
 
@@ -159,9 +158,6 @@ internal class ChartControlThumbView @JvmOverloads constructor(
         val rightThumbStart = xRangePixels.endInclusive - thumbWidth
         val rightThumbEnd = xRangePixels.endInclusive
 
-        L.d(eventX)
-        L.d("$leftThumbStart..$leftThumbEnd $rightThumbStart..$rightThumbEnd")
-
         tracking = when {
             eventX < leftThumbStart -> {
                 setLeftThumbTo(eventX)
@@ -178,14 +174,11 @@ internal class ChartControlThumbView @JvmOverloads constructor(
                 Trackable.RIGHT_THUMB
             }
         }
-        L.d(tracking)
     }
 
     private fun getFrameCenter() = (xRangePixels.start to xRangePixels.endInclusive).center()
 
     private fun onActionMove(event: MotionEvent) {
-        L.d(event.x)
-        L.d(tracking)
         when (tracking) {
             Trackable.LEFT_THUMB -> setLeftThumbTo(event.x)
             Trackable.RIGHT_THUMB -> setRightThumbTo(event.x)
