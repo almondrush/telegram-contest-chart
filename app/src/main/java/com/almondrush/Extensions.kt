@@ -18,7 +18,3 @@ val LongRange.interval get() = endInclusive - start
 fun Number.dpToInt(context: Context): Float {
     return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), context.resources.displayMetrics)
 }
-
-fun Number.ceil() = Math.ceil(toDouble()).toInt()
-
-fun Number.floor() = Math.floor(toDouble()).toInt()

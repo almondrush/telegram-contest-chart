@@ -28,13 +28,12 @@ internal class ChartXAxisView @JvmOverloads constructor(
 
     private val dateFormat = SimpleDateFormat(DATE_PATTERN, context.resources.configuration.locale)
 
-    private val textMarginTop: Int = 0
-
     private var chartPaddingLeft: Int = 0
     private var chartPaddingRight: Int = 0
-    private val labelPadding = 16
+    private val labelMargin = 64
 
-    private val textSize = 32F
+    private val textMarginTop: Int = 0
+    private val textSize = 24F
     private val textColor = Color.parseColor("#888888")
     private val textPaint = Paint()
 
@@ -43,7 +42,9 @@ internal class ChartXAxisView @JvmOverloads constructor(
     private var textTop = 0F
 
     private val drawingRect = Rect()
+    private lateinit var fullTimeRange: LongRange
     private lateinit var timeRange: LongRange
+    private var xRange: IntRange = XRange.FULL
 
     init {
         textPaint.color = textColor
@@ -56,7 +57,19 @@ internal class ChartXAxisView @JvmOverloads constructor(
     }
 
     fun setTimeRange(timeRange: LongRange) {
-        this.timeRange = timeRange
+        this.fullTimeRange = timeRange
+        updateTimeRange()
+    }
+
+    fun setXRange(xRange: IntRange) {
+        this.xRange = xRange
+        updateTimeRange()
+    }
+
+    fun updateTimeRange() {
+        val timeInXRangeUnit = fullTimeRange.interval / XRange.MAX
+        timeRange = (xRange.start * timeInXRangeUnit)..(xRange.endInclusive * timeInXRangeUnit)
+        invalidate()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -82,7 +95,7 @@ internal class ChartXAxisView @JvmOverloads constructor(
     }
 
     override fun onDraw(canvas: Canvas) {
-        val labelsCount = calculateLabelsCount(width, labelPadding, textLabelWidth)
+        val labelsCount = calculateLabelsCount(width, labelMargin, textLabelWidth)
         val dayStep = calculateDayStep(labelsCount, timeRange)
         val days = findDays(timeRange, dayStep)
         val pixelValues = convertTimeToPixelValues(days, timeRange)
@@ -94,7 +107,7 @@ internal class ChartXAxisView @JvmOverloads constructor(
     }
 
     fun convertTimeToPixelValues(days: List<Long>, timeRange: LongRange): List<Int> {
-        val pixelCount = width - (chartPaddingRight + chartPaddingLeft)
+        val pixelCount = drawingRect.width()
         val pixelPerTimeUnit = pixelCount / timeRange.interval.toFloat()
         return days.map { day -> ((day - this.timeRange.start) * pixelPerTimeUnit + chartPaddingLeft).toInt() }
     }
@@ -116,11 +129,14 @@ internal class ChartXAxisView @JvmOverloads constructor(
 
     fun calculateDayStep(maxLabelsCount: Int, timeRange: LongRange): Int {
         val daysInTimeRange = TimeUnit.MILLISECONDS.toDays(timeRange.interval)
-        return Math.ceil((daysInTimeRange / maxLabelsCount).toDouble()).toInt()
+        val days = Math.ceil((daysInTimeRange / maxLabelsCount).toDouble()).toInt()
+        val powOf2 = Math.log10(days.toDouble()) / Math.log10(2.0)
+        val result = Math.pow(2.0, Math.floor(powOf2)).toInt()
+        return result
     }
 
-    private fun calculateLabelsCount(width: Int, labelPadding: Int, textLabelWidth: Float): Int {
-        return Math.floor((width / (textLabelWidth + labelPadding)).toDouble()).toInt()
+    private fun calculateLabelsCount(availableSpace: Int, labelMargin: Int, textLabelWidth: Float): Int {
+        return Math.floor((availableSpace / (textLabelWidth + labelMargin)).toDouble()).toInt()
             .takeIf { it > 0 } ?: 1
     }
 

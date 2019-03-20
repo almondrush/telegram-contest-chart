@@ -34,6 +34,7 @@ class ChartWithLegendView @JvmOverloads constructor(
 
     fun setLines(lines: List<Line>) {
         this.lines = lines
+        xAxisView.setTimeRange(ChartUtil.getTimeRange(lines))
         setData(lines, XRange.FULL)
     }
 
@@ -41,8 +42,7 @@ class ChartWithLegendView @JvmOverloads constructor(
         val maxY = ChartUtil.findMaxYValueRanged(lines, xRange)
         chart.setData(lines, xRange = xRange, maxY = maxY)
         yAxisView.setMaxY(maxY)
-        val timeRange = ChartUtil.getTimeRange(lines)
-        xAxisView.setTimeRange(timeRange)
+        xAxisView.setXRange(xRange)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
