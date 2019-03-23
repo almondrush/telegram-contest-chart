@@ -2,10 +2,11 @@ package com.almondrush.telegramquest.legend
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.ViewGroup
 import android.widget.FrameLayout
+import com.almondrush.dpToInt
 import com.almondrush.telegramquest.ChartUtil
 import com.almondrush.telegramquest.ChartView
-import com.almondrush.telegramquest.L
 import com.almondrush.telegramquest.XRange
 import com.almondrush.telegramquest.dto.Line
 
@@ -23,6 +24,8 @@ class ChartWithLegendView @JvmOverloads constructor(
     private val yAxisView = ChartYAxisView(context, attrs, defStyleAttr, defStyleRes)
     private val xAxisView = ChartXAxisView(context, attrs, defStyleAttr, defStyleRes)
     private val xAxisPointerView = ChartXAxisPointerView(context, attrs, defStyleAttr, defStyleRes)
+    private val pointerInfoView = ChartPointerInfoView(context, attrs, defStyleAttr, defStyleRes)
+
 
     private var lines: List<Line> = emptyList()
 
@@ -31,6 +34,10 @@ class ChartWithLegendView @JvmOverloads constructor(
         addView(chart)
         addView(xAxisView)
         addView(xAxisPointerView)
+        addView(pointerInfoView)
+
+        pointerInfoView.setupWith(xAxisPointerView)
+
         xAxisView.setChartPadding(pLeft, pRight)
     }
 
@@ -43,6 +50,7 @@ class ChartWithLegendView @JvmOverloads constructor(
 
         chart.setLines(lines)
         xAxisPointerView.setLines(lines)
+        pointerInfoView.setLines(lines)
 
         setFullTimeRangeToChildren(ChartUtil.getTimeRange(lines))
         setData(lines, XRange.FULL)
@@ -73,7 +81,6 @@ class ChartWithLegendView @JvmOverloads constructor(
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         measureChild(xAxisView, widthMeasureSpec, heightMeasureSpec)
-        L.d(xAxisView.measuredHeight)
         measureChildWithMargins(
             yAxisView,
             widthMeasureSpec,
@@ -82,8 +89,14 @@ class ChartWithLegendView @JvmOverloads constructor(
             xAxisView.measuredHeight
         )
         measureChildWithMargins(chart, widthMeasureSpec, pLeft + pRight, heightMeasureSpec, xAxisView.measuredHeight)
+        measureChildWithMargins(
+            pointerInfoView,
+            widthMeasureSpec,
+            pLeft + pRight,
+            heightMeasureSpec,
+            xAxisView.measuredHeight
+        )
         measureChildWithMargins(xAxisPointerView, widthMeasureSpec, pLeft + pRight, heightMeasureSpec, xAxisView.measuredHeight)
-
         setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec))
     }
 
@@ -92,5 +105,13 @@ class ChartWithLegendView @JvmOverloads constructor(
         yAxisView.layout(pLeft, 0, yAxisView.measuredWidth + pRight, yAxisView.measuredHeight)
         xAxisView.layout(0, height - xAxisView.measuredHeight, xAxisView.measuredWidth, bottom)
         xAxisPointerView.layout(pLeft, 0, chart.measuredWidth + pRight, chart.measuredHeight)
+        pointerInfoView.layout(
+            width - (pRight + pointerInfoView.measuredWidth),
+            0,
+            width - pRight,
+            pointerInfoView.measuredHeight
+        )
+
+        pointerInfoView
     }
 }

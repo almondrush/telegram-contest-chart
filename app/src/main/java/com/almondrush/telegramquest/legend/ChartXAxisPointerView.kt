@@ -21,6 +21,8 @@ internal class ChartXAxisPointerView @JvmOverloads constructor(
     defStyleRes: Int = 0
 ) : View(context, attrs, defStyleAttr, defStyleRes) {
 
+    var listener: Listener? = null
+
     private val pointInnerRadius: Float = 10F
     private val pointOuterRadius: Float = 15F
     private val pointInnerColor = Color.parseColor("#FFFFFF")
@@ -106,6 +108,7 @@ internal class ChartXAxisPointerView @JvmOverloads constructor(
                 parent.requestDisallowInterceptTouchEvent(false)
                 touchX = null
                 invalidate()
+                listener?.onSelectionRemoved()
             }
 
         }
@@ -122,6 +125,7 @@ internal class ChartXAxisPointerView @JvmOverloads constructor(
             val displayX = chartPoints.first().x.toFloat()
             canvas.drawLine(displayX, 0F, displayX, height.toFloat(), linePaint)
             chartPoints.forEach { canvas.drawChartPoint(it.x.toFloat(), it.y.toFloat(), it.color) }
+            listener?.onSelectedPointChanged(chartPoints.first().time, chartPoints.map { it.value })
         }
     }
 
@@ -133,4 +137,9 @@ internal class ChartXAxisPointerView @JvmOverloads constructor(
     }
 
     private data class ChartPoint(var color: Int, var x: Int = 0, var y: Int = 0, var time: Long = 0, var value: Long = 0)
+
+    interface Listener {
+        fun onSelectedPointChanged(time: Long, values: List<Long>)
+        fun onSelectionRemoved()
+    }
 }

@@ -55,7 +55,6 @@ internal class ChartXAxisView @JvmOverloads constructor(
     private var dayStep: Int by Delegates.observable(0) {_, oldValue, newValue ->
         if (oldValue != newValue) {
             timeOfDaysToShow = findDays(fullTimeRange, dayStep)
-            L.d("days to show: $timeOfDaysToShow")
         }
     }
 
@@ -78,7 +77,6 @@ internal class ChartXAxisView @JvmOverloads constructor(
         if (::fullTimeRange.isInitialized) {
             timeRange = ChartUtil.selectTimeRange(fullTimeRange, xRange)
             dayStep = calculateDayStep(labelsCount, timeRange)
-            L.d("day step: $dayStep")
             invalidate()
         }
     }
@@ -107,7 +105,6 @@ internal class ChartXAxisView @JvmOverloads constructor(
                 drawingRect.bottom
             )
             labelsCount = calculateLabelsCount(drawingRect.width(), labelMargin, textLabelWidth)
-            L.d("labels count: $labelsCount")
             updateTimeRange()
         }
     }
@@ -148,7 +145,6 @@ internal class ChartXAxisView @JvmOverloads constructor(
         .takeIf { it <= endTime }
 
     private fun calculateDayStep(maxLabelsCount: Int, timeRange: LongRange): Int {
-        L.d("max labels: $maxLabelsCount, time range: $timeRange")
         if (maxLabelsCount == 0) return 0
         val daysInTimeRange = TimeUnit.MILLISECONDS.toDays(timeRange.interval)
         val days = Math.ceil((daysInTimeRange / maxLabelsCount).toDouble()).toInt()
@@ -157,7 +153,6 @@ internal class ChartXAxisView @JvmOverloads constructor(
     }
 
     private fun calculateLabelsCount(availableSpace: Int, labelMargin: Int, textLabelWidth: Float): Int {
-        L.d("available space: $availableSpace, label margin: $labelMargin, text label width: $textLabelWidth")
         return Math.floor((availableSpace / (textLabelWidth + labelMargin)).toDouble()).toInt()
             .takeIf { it > 0 } ?: 1
     }
