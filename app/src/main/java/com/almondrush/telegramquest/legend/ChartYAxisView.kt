@@ -1,4 +1,4 @@
-package com.almondrush.telegramquest
+package com.almondrush.telegramquest.legend
 
 import android.content.Context
 import android.graphics.Canvas

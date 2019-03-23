@@ -1,8 +1,12 @@
-package com.almondrush.telegramquest
+package com.almondrush.telegramquest.legend
 
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
+import com.almondrush.telegramquest.ChartUtil
+import com.almondrush.telegramquest.ChartView
+import com.almondrush.telegramquest.L
+import com.almondrush.telegramquest.XRange
 import com.almondrush.telegramquest.dto.Line
 
 class ChartWithLegendView @JvmOverloads constructor(
@@ -16,8 +20,10 @@ class ChartWithLegendView @JvmOverloads constructor(
     private val pLeft = 32
 
     private val chart = ChartView(context, attrs, defStyleAttr, defStyleRes)
-    private val yAxisView = ChartYAxisView(context, attrs, defStyleAttr, defStyleRes)
-    private val xAxisView = ChartXAxisView(context, attrs, defStyleAttr, defStyleRes)
+    private val yAxisView =
+        ChartYAxisView(context, attrs, defStyleAttr, defStyleRes)
+    private val xAxisView =
+        ChartXAxisView(context, attrs, defStyleAttr, defStyleRes)
 
     private var lines: List<Line> = emptyList()
 

@@ -1,4 +1,4 @@
-package com.almondrush.telegramquest
+package com.almondrush.telegramquest.legend
 
 import android.content.Context
 import android.graphics.Canvas
@@ -8,6 +8,9 @@ import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
 import com.almondrush.interval
+import com.almondrush.telegramquest.BuildConfig
+import com.almondrush.telegramquest.L
+import com.almondrush.telegramquest.XRange
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -115,7 +118,7 @@ internal class ChartXAxisView @JvmOverloads constructor(
         convertTimeToPixelValues(timeOfDaysToShow, timeRange)
             .mapIndexed { index, value -> value to getDayString(timeOfDaysToShow[index]) }
             .forEach { (x, label) ->
-                canvas.drawTextAlignCenter(label, x.toFloat(), textTop + textMarginTop.toFloat(), textPaint)
+                canvas.drawTextLabel(label, x.toFloat(), textTop + textMarginTop.toFloat(), textPaint)
             }
     }
 
@@ -161,10 +164,8 @@ internal class ChartXAxisView @JvmOverloads constructor(
             .takeIf { it > 0 } ?: 1
     }
 
-    private fun Canvas.drawTextAlignCenter(text: String, x: Float, y: Float, paint: Paint) {
-        val measuredSize = paint.measureText(text)
-        drawText(text, x - measuredSize / 2, y, paint)
-        L.d(measuredSize)
+    private fun Canvas.drawTextLabel(text: String, x: Float, y: Float, paint: Paint) {
+        drawText(text, x, y, paint)
         if (BuildConfig.DEBUG) {
             //Show precise day point
             val fontMetrics = paint.fontMetrics

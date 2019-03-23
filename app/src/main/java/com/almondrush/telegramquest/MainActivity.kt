@@ -1,7 +1,6 @@
 package com.almondrush.telegramquest
 
 import android.content.res.ColorStateList
-import android.opengl.Visibility
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,10 +8,10 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.CompoundButtonCompat
-import androidx.recyclerview.widget.RecyclerView
 import com.almondrush.setOnRippleClickListener
+import com.almondrush.telegramquest.control.ChartControlView
 import com.almondrush.telegramquest.dto.Line
+import com.almondrush.telegramquest.legend.ChartWithLegendView
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,7 +36,7 @@ class MainActivity : AppCompatActivity() {
         setLines(testLines)
     }
 
-    fun setLines(lines: List<Line>) {
+    private fun setLines(lines: List<Line>) {
         chartView.setLines(lines)
         controlView.setLines(lines)
         createLabels(lines)

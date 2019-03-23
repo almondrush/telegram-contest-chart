@@ -1,8 +1,10 @@
-package com.almondrush.telegramquest
+package com.almondrush.telegramquest.control
 
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
+import com.almondrush.telegramquest.ChartUtil
+import com.almondrush.telegramquest.ChartView
 import com.almondrush.telegramquest.dto.Line
 
 class ChartControlView @JvmOverloads constructor(
@@ -13,7 +15,8 @@ class ChartControlView @JvmOverloads constructor(
 ) : FrameLayout(context, attrs, defStyleAttr, defStyleRes) {
 
     private val chart = ChartView(context, attrs, defStyleAttr, defStyleRes)
-    private val thumb = ChartControlThumbView(context, attrs, defStyleAttr, defStyleRes)
+    private val thumb =
+        ChartControlThumbView(context, attrs, defStyleAttr, defStyleRes)
 
     init {
         addView(chart)

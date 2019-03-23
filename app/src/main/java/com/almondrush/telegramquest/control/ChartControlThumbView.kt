@@ -1,4 +1,4 @@
-package com.almondrush.telegramquest
+package com.almondrush.telegramquest.control
 
 import android.content.Context
 import android.graphics.Canvas
@@ -10,6 +10,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import com.almondrush.center
+import com.almondrush.telegramquest.XRange
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
 
@@ -20,8 +21,8 @@ internal class ChartControlThumbView @JvmOverloads constructor(
     defStyleRes: Int = 0
 ) : View(context, attrs, defStyleAttr, defStyleRes) {
 
-    private var thumbColor = Color.argb(128, 0, 0, 255)
-    private var fogColor = Color.argb(64, 0, 0, 255)
+    private var thumbColor = Color.argb(0x44, 0x41, 0x69, 0x90)
+    private var fogColor = Color.argb(0x11, 0x41, 0x69, 0x90)
 
     private val paint = Paint()
     private val path = Path()
