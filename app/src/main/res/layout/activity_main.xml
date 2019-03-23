@@ -1,31 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:layout_height="match_parent">
 
-    <com.almondrush.telegramquest.ChartWithLegendView
-        android:id="@+id/chart_view"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="236dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-    <com.almondrush.telegramquest.ChartControlView
-        android:id="@+id/chart_control"
-        android:layout_width="0dp"
-        android:layout_height="64dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/chart_view" />
+        <com.almondrush.telegramquest.ChartWithLegendView
+            android:id="@+id/chart_view"
+            android:layout_width="match_parent"
+            android:layout_height="236dp"
+            android:layout_marginTop="8dp" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <com.almondrush.telegramquest.ChartControlView
+            android:id="@+id/chart_control"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="16dp">
+
+        </com.almondrush.telegramquest.ChartControlView>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:id="@+id/chart_line_names_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="8dp">
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

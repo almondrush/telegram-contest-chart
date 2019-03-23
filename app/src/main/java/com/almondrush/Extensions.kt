@@ -2,6 +2,7 @@ package com.almondrush
 
 import android.content.Context
 import android.util.TypedValue
+import android.view.View
 
 fun Pair<Number, Number>.center(): Float {
     val a = first.toFloat()
@@ -17,4 +18,10 @@ val LongRange.interval get() = endInclusive - start
 
 fun Number.dpToInt(context: Context): Float {
     return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), context.resources.displayMetrics)
+}
+
+fun View.setOnRippleClickListener(listener: () -> Unit) {
+    setOnClickListener {
+        handler.postDelayed(listener, 150)
+    }
 }

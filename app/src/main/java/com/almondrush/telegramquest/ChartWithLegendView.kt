@@ -34,13 +34,13 @@ class ChartWithLegendView @JvmOverloads constructor(
 
     fun setLines(lines: List<Line>) {
         this.lines = lines
-        xAxisView.setTimeRange(ChartUtil.getTimeRange(lines))
+        xAxisView.setFullTimeRange(ChartUtil.getTimeRange(lines))
         setData(lines, XRange.FULL)
     }
 
     private fun setData(lines: List<Line>, xRange: IntRange) {
         val maxY = ChartUtil.findMaxYValueRanged(lines, xRange)
-        chart.setData(lines, xRange = xRange, maxY = maxY)
+        chart.setData(lines, xRange, maxY)
         yAxisView.setMaxY(maxY)
         xAxisView.setXRange(xRange)
     }

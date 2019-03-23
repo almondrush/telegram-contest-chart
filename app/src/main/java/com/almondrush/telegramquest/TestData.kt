@@ -6,7 +6,7 @@ import com.almondrush.telegramquest.dto.PointL
 
 val testLines = listOf(
     Line(
-        Color.parseColor("#3DC23F"), "red", listOf(
+        Color.parseColor("#3DC23F"), "green", listOf(
             PointL(1542412800000, 37),
             PointL(1542499200000, 20),
             PointL(1542585600000, 32),
@@ -122,7 +122,7 @@ val testLines = listOf(
         )
     ),
     Line(
-        Color.parseColor("#F34C44"), "green", listOf(
+        Color.parseColor("#F34C44"), "red", listOf(
             PointL(1542412800000, 22),
             PointL(1542499200000, 12),
             PointL(1542585600000, 30),

@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
+import kotlin.properties.Delegates
 
 internal class ChartXAxisView @JvmOverloads constructor(
     context: Context,
@@ -23,17 +24,17 @@ internal class ChartXAxisView @JvmOverloads constructor(
     companion object {
         val MILLISECONDS_IN_A_DAY = TimeUnit.DAYS.toMillis(1)
         private const val DATE_PATTERN = "MMM d"
-        private const val LABEL_TEXT_TO_MEASURE = "WWW 99"
+        private const val LABEL_TEXT_TO_MEASURE = "MMM 99"
     }
 
     private val dateFormat = SimpleDateFormat(DATE_PATTERN, context.resources.configuration.locale)
 
     private var chartPaddingLeft: Int = 0
     private var chartPaddingRight: Int = 0
-    private val labelMargin = 64
+    private val labelMargin = 42
 
     private val textMarginTop: Int = 0
-    private val textSize = 24F
+    private val textSize = 20F
     private val textColor = Color.parseColor("#888888")
     private val textPaint = Paint()
 
@@ -42,21 +43,24 @@ internal class ChartXAxisView @JvmOverloads constructor(
     private var textTop = 0F
 
     private val drawingRect = Rect()
+    private var xRange: IntRange = XRange.FULL
     private lateinit var fullTimeRange: LongRange
     private lateinit var timeRange: LongRange
-    private var xRange: IntRange = XRange.FULL
+    private var labelsCount: Int = 0
+    private lateinit var timeOfDaysToShow: List<Long>
+    private var dayStep: Int by Delegates.observable(0) {_, oldValue, newValue ->
+        if (oldValue != newValue) {
+            timeOfDaysToShow = findDays(fullTimeRange, dayStep)
+            L.d("days to show: $timeOfDaysToShow")
+        }
+    }
 
     init {
         textPaint.color = textColor
         textPaint.textSize = textSize
     }
 
-    fun setChartPadding(left: Int, right: Int) {
-        chartPaddingLeft = left
-        chartPaddingRight = right
-    }
-
-    fun setTimeRange(timeRange: LongRange) {
+    fun setFullTimeRange(timeRange: LongRange) {
         this.fullTimeRange = timeRange
         updateTimeRange()
     }
@@ -66,17 +70,25 @@ internal class ChartXAxisView @JvmOverloads constructor(
         updateTimeRange()
     }
 
-    fun updateTimeRange() {
-        val timeInXRangeUnit = fullTimeRange.interval / XRange.MAX
-        timeRange = (xRange.start * timeInXRangeUnit)..(xRange.endInclusive * timeInXRangeUnit)
-        invalidate()
+    private fun updateTimeRange() {
+        if (::fullTimeRange.isInitialized) {
+            val timeInXRangeUnit = fullTimeRange.interval / XRange.MAX
+            val start = (fullTimeRange.start + xRange.start * timeInXRangeUnit)
+            val end = (fullTimeRange.start + xRange.endInclusive * timeInXRangeUnit)
+            timeRange = start..end
+            dayStep = calculateDayStep(labelsCount, timeRange)
+            L.d("day step: $dayStep")
+            invalidate()
+        }
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val fontMetrics = textPaint.fontMetrics
         textTop = -fontMetrics.top
         textLineHeight = fontMetrics.bottom - fontMetrics.top + fontMetrics.leading
+
         textLabelWidth = textPaint.measureText(LABEL_TEXT_TO_MEASURE)
+
         setMeasuredDimension(
             getDefaultSize(suggestedMinimumWidth, widthMeasureSpec),
             textLineHeight.roundToInt() + textMarginTop
@@ -85,57 +97,66 @@ internal class ChartXAxisView @JvmOverloads constructor(
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         super.onLayout(changed, left, top, right, bottom)
-        getDrawingRect(drawingRect)
-        drawingRect.set(
-            drawingRect.left + chartPaddingLeft,
-            drawingRect.top,
-            drawingRect.right - chartPaddingRight,
-            drawingRect.bottom
-        )
+        if (changed) {
+            getDrawingRect(drawingRect)
+            drawingRect.set(
+                drawingRect.left + chartPaddingLeft,
+                drawingRect.top,
+                drawingRect.right - chartPaddingRight,
+                drawingRect.bottom
+            )
+            labelsCount = calculateLabelsCount(drawingRect.width(), labelMargin, textLabelWidth)
+            L.d("labels count: $labelsCount")
+            updateTimeRange()
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
-        val labelsCount = calculateLabelsCount(width, labelMargin, textLabelWidth)
-        val dayStep = calculateDayStep(labelsCount, timeRange)
-        val days = findDays(timeRange, dayStep)
-        val pixelValues = convertTimeToPixelValues(days, timeRange)
-        pixelValues
-            .mapIndexed { index, value -> value to getDayString(days[index]) }
+        convertTimeToPixelValues(timeOfDaysToShow, timeRange)
+            .mapIndexed { index, value -> value to getDayString(timeOfDaysToShow[index]) }
             .forEach { (x, label) ->
                 canvas.drawTextAlignCenter(label, x.toFloat(), textTop + textMarginTop.toFloat(), textPaint)
             }
     }
 
-    fun convertTimeToPixelValues(days: List<Long>, timeRange: LongRange): List<Int> {
+    internal fun setChartPadding(left: Int, right: Int) {
+        chartPaddingLeft = left
+        chartPaddingRight = right
+        updateTimeRange()
+    }
+
+    private fun convertTimeToPixelValues(days: List<Long>, timeRange: LongRange): List<Int> {
         val pixelCount = drawingRect.width()
         val pixelPerTimeUnit = pixelCount / timeRange.interval.toFloat()
         return days.map { day -> ((day - this.timeRange.start) * pixelPerTimeUnit + chartPaddingLeft).toInt() }
     }
 
-    fun getDayString(time: Long) = dateFormat.format(Date(time))
+    private fun getDayString(time: Long) = dateFormat.format(Date(time))
 
-    fun findDays(timeRange: LongRange, dayStep: Int): MutableList<Long> {
-        var currentDay = findNextDay(timeRange.start, timeRange.endInclusive)
+    private fun findDays(fullTimeRange: LongRange, dayStep: Int): List<Long> {
+        var currentDay = findNextDay(fullTimeRange.start, fullTimeRange.endInclusive)
         val days = mutableListOf<Long>()
         while (currentDay != null) {
             days.add(currentDay)
-            currentDay = findNextDay(currentDay + MILLISECONDS_IN_A_DAY * dayStep, timeRange.endInclusive)
+            currentDay = findNextDay(currentDay + MILLISECONDS_IN_A_DAY * dayStep, fullTimeRange.endInclusive)
         }
         return days
     }
 
-    fun findNextDay(startTime: Long, endTime: Long) = ((startTime / MILLISECONDS_IN_A_DAY) * MILLISECONDS_IN_A_DAY)
+    private fun findNextDay(startTime: Long, endTime: Long) = ((startTime / MILLISECONDS_IN_A_DAY) * MILLISECONDS_IN_A_DAY)
         .takeIf { it <= endTime }
 
-    fun calculateDayStep(maxLabelsCount: Int, timeRange: LongRange): Int {
+    private fun calculateDayStep(maxLabelsCount: Int, timeRange: LongRange): Int {
+        L.d("max labels: $maxLabelsCount, time range: $timeRange")
+        if (maxLabelsCount == 0) return 0
         val daysInTimeRange = TimeUnit.MILLISECONDS.toDays(timeRange.interval)
         val days = Math.ceil((daysInTimeRange / maxLabelsCount).toDouble()).toInt()
         val powOf2 = Math.log10(days.toDouble()) / Math.log10(2.0)
-        val result = Math.pow(2.0, Math.floor(powOf2)).toInt()
-        return result
+        return Math.pow(2.0, Math.floor(powOf2)).toInt()
     }
 
     private fun calculateLabelsCount(availableSpace: Int, labelMargin: Int, textLabelWidth: Float): Int {
+        L.d("available space: $availableSpace, label margin: $labelMargin, text label width: $textLabelWidth")
         return Math.floor((availableSpace / (textLabelWidth + labelMargin)).toDouble()).toInt()
             .takeIf { it > 0 } ?: 1
     }
@@ -143,6 +164,13 @@ internal class ChartXAxisView @JvmOverloads constructor(
     private fun Canvas.drawTextAlignCenter(text: String, x: Float, y: Float, paint: Paint) {
         val measuredSize = paint.measureText(text)
         drawText(text, x - measuredSize / 2, y, paint)
+        L.d(measuredSize)
+        if (BuildConfig.DEBUG) {
+            //Show precise day point
+            val fontMetrics = paint.fontMetrics
+            val lineHeight = -fontMetrics.top + fontMetrics.ascent
+            drawLine(x, 0F, x, lineHeight, paint)
+        }
     }
 }
 
