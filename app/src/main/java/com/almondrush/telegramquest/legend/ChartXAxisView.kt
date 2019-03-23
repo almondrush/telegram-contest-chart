@@ -9,6 +9,7 @@ import android.util.AttributeSet
 import android.view.View
 import com.almondrush.interval
 import com.almondrush.telegramquest.BuildConfig
+import com.almondrush.telegramquest.ChartUtil
 import com.almondrush.telegramquest.L
 import com.almondrush.telegramquest.XRange
 import java.text.SimpleDateFormat
@@ -75,10 +76,7 @@ internal class ChartXAxisView @JvmOverloads constructor(
 
     private fun updateTimeRange() {
         if (::fullTimeRange.isInitialized) {
-            val timeInXRangeUnit = fullTimeRange.interval / XRange.MAX
-            val start = (fullTimeRange.start + xRange.start * timeInXRangeUnit)
-            val end = (fullTimeRange.start + xRange.endInclusive * timeInXRangeUnit)
-            timeRange = start..end
+            timeRange = ChartUtil.selectTimeRange(fullTimeRange, xRange)
             dayStep = calculateDayStep(labelsCount, timeRange)
             L.d("day step: $dayStep")
             invalidate()

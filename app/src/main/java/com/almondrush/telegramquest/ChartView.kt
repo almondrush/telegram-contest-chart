@@ -37,13 +37,20 @@ class ChartView @JvmOverloads constructor(
         initPaint()
     }
 
-    fun setData(lines: List<Line> = this.lines, xRange: IntRange = this.xRange, maxY: Long = this.maxY) {
-        require(XRange.MIN <= xRange.first && xRange.last <= XRange.MAX) {
-            "Wrong range: $xRange. Allowed range: ${XRange.FULL}."
-        }
+    fun setLines(lines: List<Line>) {
         this.lines = lines
-        this.xRange = xRange
-        this.maxY = maxY
+        shouldUpdate = true
+        invalidate()
+    }
+
+    fun setMaxY(y: Long) {
+        maxY = y
+        shouldUpdate = true
+        invalidate()
+    }
+
+    fun setXRange(range: IntRange) {
+        xRange = range
         shouldUpdate = true
         invalidate()
     }

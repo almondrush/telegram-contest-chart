@@ -142,11 +142,16 @@ internal class ChartControlThumbView @JvmOverloads constructor(
 
     override fun onTouchEvent(event: MotionEvent): Boolean = when (event.actionMasked) {
         MotionEvent.ACTION_DOWN -> {
+            parent.requestDisallowInterceptTouchEvent(true)
             onActionDown(event)
             true
         }
         MotionEvent.ACTION_MOVE -> {
             onActionMove(event)
+            true
+        }
+        MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+            parent.requestDisallowInterceptTouchEvent(false)
             true
         }
         else -> super.onTouchEvent(event)

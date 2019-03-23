@@ -20,10 +20,9 @@ class ChartWithLegendView @JvmOverloads constructor(
     private val pLeft = 32
 
     private val chart = ChartView(context, attrs, defStyleAttr, defStyleRes)
-    private val yAxisView =
-        ChartYAxisView(context, attrs, defStyleAttr, defStyleRes)
-    private val xAxisView =
-        ChartXAxisView(context, attrs, defStyleAttr, defStyleRes)
+    private val yAxisView = ChartYAxisView(context, attrs, defStyleAttr, defStyleRes)
+    private val xAxisView = ChartXAxisView(context, attrs, defStyleAttr, defStyleRes)
+    private val xAxisPointerView = ChartXAxisPointerView(context, attrs, defStyleAttr, defStyleRes)
 
     private var lines: List<Line> = emptyList()
 
@@ -31,6 +30,7 @@ class ChartWithLegendView @JvmOverloads constructor(
         addView(yAxisView)
         addView(chart)
         addView(xAxisView)
+        addView(xAxisPointerView)
         xAxisView.setChartPadding(pLeft, pRight)
     }
 
@@ -40,15 +40,35 @@ class ChartWithLegendView @JvmOverloads constructor(
 
     fun setLines(lines: List<Line>) {
         this.lines = lines
-        xAxisView.setFullTimeRange(ChartUtil.getTimeRange(lines))
+
+        chart.setLines(lines)
+        xAxisPointerView.setLines(lines)
+
+        setFullTimeRangeToChildren(ChartUtil.getTimeRange(lines))
         setData(lines, XRange.FULL)
     }
 
     private fun setData(lines: List<Line>, xRange: IntRange) {
         val maxY = ChartUtil.findMaxYValueRanged(lines, xRange)
-        chart.setData(lines, xRange, maxY)
-        yAxisView.setMaxY(maxY)
+        setMaxYToChildren(maxY)
+        setXRangeToChildren(xRange)
+    }
+
+    private fun setXRangeToChildren(xRange: IntRange) {
+        chart.setXRange(xRange)
         xAxisView.setXRange(xRange)
+        xAxisPointerView.setXRange(xRange)
+    }
+
+    private fun setMaxYToChildren(maxY: Long) {
+        chart.setMaxY(maxY)
+        yAxisView.setMaxY(maxY)
+        xAxisPointerView.setMaxYValue(maxY)
+    }
+
+    private fun setFullTimeRangeToChildren(range: LongRange) {
+        xAxisView.setFullTimeRange(range)
+        xAxisPointerView.setFullTimeRange(range)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -62,6 +82,7 @@ class ChartWithLegendView @JvmOverloads constructor(
             xAxisView.measuredHeight
         )
         measureChildWithMargins(chart, widthMeasureSpec, pLeft + pRight, heightMeasureSpec, xAxisView.measuredHeight)
+        measureChildWithMargins(xAxisPointerView, widthMeasureSpec, pLeft + pRight, heightMeasureSpec, xAxisView.measuredHeight)
 
         setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec))
     }
@@ -70,5 +91,6 @@ class ChartWithLegendView @JvmOverloads constructor(
         chart.layout(pLeft, 0, chart.measuredWidth + pRight, chart.measuredHeight)
         yAxisView.layout(pLeft, 0, yAxisView.measuredWidth + pRight, yAxisView.measuredHeight)
         xAxisView.layout(0, height - xAxisView.measuredHeight, xAxisView.measuredWidth, bottom)
+        xAxisPointerView.layout(pLeft, 0, chart.measuredWidth + pRight, chart.measuredHeight)
     }
 }

@@ -2,11 +2,19 @@ package com.almondrush.telegramquest
 
 import android.graphics.PointF
 import android.graphics.Rect
+import com.almondrush.interval
 import com.almondrush.telegramquest.dto.Line
 import com.almondrush.telegramquest.dto.LinePx
 import com.almondrush.telegramquest.dto.PointL
 
 object ChartUtil {
+
+    fun selectTimeRange(fullTimeRange: LongRange, selectionRange: IntRange): LongRange {
+        val timeInXRangeUnit = fullTimeRange.interval / XRange.MAX
+        val start = (fullTimeRange.start + selectionRange.start * timeInXRangeUnit)
+        val end = (fullTimeRange.start + selectionRange.endInclusive * timeInXRangeUnit)
+        return start..end
+    }
 
     fun getTimeRange(lines: List<Line>): LongRange {
         val startTime = requireNotNull(lines.map { it.data.first() }.minBy { it.x }).x

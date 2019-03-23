@@ -28,7 +28,8 @@ class ChartControlView @JvmOverloads constructor(
     }
 
     fun setLines(lines: List<Line>) {
-        chart.setData(lines, maxY = ChartUtil.findMaxYValue(lines))
+        chart.setLines(lines)
+        chart.setMaxY(ChartUtil.findMaxYValue(lines))
     }
 
     interface XRangeUpdatedListener {
