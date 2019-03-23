@@ -8,7 +8,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import com.almondrush.interval
-import com.almondrush.telegramquest.L
+import com.almondrush.telegramquest.ChartUtil
 import com.almondrush.telegramquest.XRange
 import com.almondrush.telegramquest.dto.Line
 import kotlin.math.roundToInt
@@ -62,28 +62,32 @@ internal class ChartXAxisPointerView @JvmOverloads constructor(
     }
 
     private fun calculateChartPoints(x: Float) {
-        val xRelative = x / width
-        val xRangeValue = xRange.interval * xRelative
-        val xTimeValue = ((fullTimeRange.interval * xRangeValue) / XRange.MAX + fullTimeRange.start).roundToLong()
-        val yValues = findYValues(lines, xTimeValue)
-        val yPixelValues = yValues.map { ((it / maxY) * height).roundToInt() }
-        chartPoints.forEachIndexed { index, chartPoint ->
-            chartPoint.y = yPixelValues[index]
-            chartPoint.time = xTimeValue
-            chartPoint.value = yValues[index]
+        val time = findClosestTimeValue(x, lines.first())
+        val displayX = timeToXPixel(time, fullTimeRange, xRange)
+        lines.mapIndexed { index, line ->
+            val point = requireNotNull(line.data.find { it.x == time })
+            val y = ((point.y.toFloat() / maxY) * height).roundToInt()
+            chartPoints[index].let {
+                it.color = line.color
+                it.time = time
+                it.value = point.y
+                it.x = displayX
+                it.y = y
+            }
         }
     }
 
-    private fun findYValues(lines: List<Line>, time: Long) = lines.map { line ->
-        val right = line.data.find { point -> point.x > time } ?: line.data.first()
-        L.d("right $right")
-        val left = line.data.findLast { point -> point.x < time } ?: line.data.last()
-        L.d("left $left")
-        val relativeMultiplier = if (left == right) 0F else (time.toFloat() - left.x) / (left.x..right.x).interval
-        L.d("rel $relativeMultiplier")
-        val yValue = (left.y + (right.y - left.y) * relativeMultiplier)
-        L.d("y $yValue")
-        yValue
+    private fun findClosestTimeValue(x: Float, line: Line): Long {
+        val xRelative = x / width
+        val xRangeValue = xRange.start + xRange.interval * xRelative
+        val xTimeValue = ((fullTimeRange.interval * xRangeValue) / XRange.MAX + fullTimeRange.start).roundToLong()
+        return requireNotNull(line.data.minBy { Math.abs(it.x - xTimeValue) }).x
+    }
+
+    private fun timeToXPixel(time: Long, fullTimeRange: LongRange, xRange: IntRange): Int {
+        val timeRange = ChartUtil.selectTimeRange(fullTimeRange, xRange)
+        val timeRelative = (time.toFloat() - timeRange.start) / timeRange.interval
+        return  (width * timeRelative).roundToInt()
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -115,8 +119,9 @@ internal class ChartXAxisPointerView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         touchX?.let { x ->
             calculateChartPoints(x)
-            canvas.drawLine(x, 0F, x, height.toFloat(), linePaint)
-            chartPoints.forEach { canvas.drawChartPoint(x, it.y.toFloat(), it.color) }
+            val displayX = chartPoints.first().x.toFloat()
+            canvas.drawLine(displayX, 0F, displayX, height.toFloat(), linePaint)
+            chartPoints.forEach { canvas.drawChartPoint(it.x.toFloat(), it.y.toFloat(), it.color) }
         }
     }
 
@@ -127,5 +132,5 @@ internal class ChartXAxisPointerView @JvmOverloads constructor(
         drawCircle(x, height - y, pointInnerRadius, pointPaint)
     }
 
-    private data class ChartPoint(var color: Int, var y: Int = 0, var time: Long = 0, var value: Float = 0F)
+    private data class ChartPoint(var color: Int, var x: Int = 0, var y: Int = 0, var time: Long = 0, var value: Long = 0)
 }
