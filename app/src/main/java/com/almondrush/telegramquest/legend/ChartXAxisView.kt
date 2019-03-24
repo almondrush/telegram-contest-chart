@@ -36,7 +36,7 @@ internal class ChartXAxisView @JvmOverloads constructor(
 
     private var chartPaddingLeft: Int = 0
     private var chartPaddingRight: Int = 0
-    private val labelMargin = 42
+    private val labelMargin = 15
 
     private val textMarginTop: Int = 0
     private val textSize = 20F
@@ -44,19 +44,18 @@ internal class ChartXAxisView @JvmOverloads constructor(
     private val textPaint = Paint()
 
     private var textLineHeight = 0F
-    private var textLabelWidth = 0F
+    private var labelWidth = 0F
     private var textTop = 0F
 
+    private val measureRect = Rect()
     private val drawingRect = Rect()
     private var xRange: IntRange = XRange.FULL
     private lateinit var fullTimeRange: LongRange
     private lateinit var timeRange: LongRange
-    private var labelsCount: Int = 0
+    private var labelsCount: Float = 0F
     private lateinit var timeOfDaysToShow: List<Long>
     private var dayStep: Int by Delegates.observable(0) {_, oldValue, newValue ->
-        if (oldValue != newValue) {
-            timeOfDaysToShow = findDays(fullTimeRange, dayStep)
-        }
+        if (oldValue != newValue) timeOfDaysToShow = findDays(fullTimeRange, dayStep)
     }
 
     init {
@@ -87,7 +86,11 @@ internal class ChartXAxisView @JvmOverloads constructor(
         textTop = -fontMetrics.top
         textLineHeight = textPaint.textHeight
 
-        textLabelWidth = textPaint.measureText(LABEL_TEXT_TO_MEASURE)
+        textPaint.getTextBounds(LABEL_TEXT_TO_MEASURE, 0, LABEL_TEXT_TO_MEASURE.length - 1, measureRect)
+
+//        labelWidth = textPaint.measureText(LABEL_TEXT_TO_MEASURE)
+        labelWidth = measureRect.width().toFloat()
+        L.d(labelWidth)
 
         setMeasuredDimension(
             getDefaultSize(suggestedMinimumWidth, widthMeasureSpec),
@@ -105,17 +108,40 @@ internal class ChartXAxisView @JvmOverloads constructor(
                 drawingRect.right - chartPaddingRight,
                 drawingRect.bottom
             )
-            labelsCount = calculateLabelsCount(drawingRect.width(), labelMargin, textLabelWidth)
+            labelsCount = calculateLabelsCount(drawingRect.width(), labelMargin, labelWidth)
             updateTimeRange()
         }
     }
 
     override fun onDraw(canvas: Canvas) {
-        convertTimeToPixelValues(timeOfDaysToShow, timeRange)
-            .mapIndexed { index, value -> value to getDayString(timeOfDaysToShow[index]) }
-            .forEach { (x, label) ->
+        val pixelValues = convertTimeToPixelValues(timeOfDaysToShow, timeRange)
+        val spaceBetweenLabels = getDistanceBetweenLabels(pixelValues)
+        val alpha = Math.min(spaceBetweenLabels / (labelWidth + labelMargin), 1.0F)
+        L.d("alpha $alpha")
+
+        pixelValues.mapIndexed { index, value -> value to getDayString(timeOfDaysToShow[index]) }
+            .forEachIndexed { index, (x, label) ->
+                if (index % 2 != 0) {
+                    textPaint.color = Color.argb(
+                        (255 * alpha).toInt(),
+                        Color.red(textColor),
+                        Color.green(textColor),
+                        Color.blue(textColor)
+                    )
+                } else {
+                    textPaint.color = textColor
+                }
                 canvas.drawTextLabel(label, x.toFloat(), textTop + textMarginTop.toFloat(), textPaint)
             }
+    }
+
+    fun getDistanceBetweenLabels(xValues: List<Int>): Float {
+        return if (xValues.size < 3) {
+            labelWidth
+        } else {
+            L.d("left ${xValues[2]} right ${xValues[0]} lawidth $labelWidth")
+            (xValues[2] - xValues[0].toFloat() - 2 * (labelWidth + labelMargin)) / 2
+        }
     }
 
     internal fun setChartPadding(left: Int, right: Int) {
@@ -146,17 +172,17 @@ internal class ChartXAxisView @JvmOverloads constructor(
     private fun findNextDay(startTime: Long, endTime: Long) = ((startTime / MILLISECONDS_IN_A_DAY) * MILLISECONDS_IN_A_DAY)
         .takeIf { it <= endTime }
 
-    private fun calculateDayStep(maxLabelsCount: Int, timeRange: LongRange): Int {
-        if (maxLabelsCount == 0) return 0
+    private fun calculateDayStep(maxLabelsCount: Float, timeRange: LongRange): Int {
+        if (maxLabelsCount < 1) return 0
         val daysInTimeRange = TimeUnit.MILLISECONDS.toDays(timeRange.interval)
-        val days = Math.ceil((daysInTimeRange / maxLabelsCount).toDouble()).toInt()
+        val days = daysInTimeRange / maxLabelsCount
         val powOf2 = Math.log10(days.toDouble()) / Math.log10(2.0)
         return Math.pow(2.0, Math.floor(powOf2)).toInt()
     }
 
-    private fun calculateLabelsCount(availableSpace: Int, labelMargin: Int, textLabelWidth: Float): Int {
-        return Math.floor((availableSpace / (textLabelWidth + labelMargin)).toDouble()).toInt()
-            .takeIf { it > 0 } ?: 1
+    private fun calculateLabelsCount(availableSpace: Int, labelMargin: Int, textLabelWidth: Float): Float {
+        return Math.floor((availableSpace / (textLabelWidth + labelMargin)).toDouble() / 2)
+            .takeIf { it > 1.0 }?.toFloat() ?: 1.0F
     }
 
     private fun Canvas.drawTextLabel(text: String, x: Float, y: Float, paint: Paint) {

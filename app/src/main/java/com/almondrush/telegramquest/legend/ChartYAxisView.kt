@@ -112,7 +112,6 @@ class ChartYAxisView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         labelSeries.forEach { series ->
-            L.d("${series.maxY} ${series.isAppearing}, ${series.animatedValue}")
             val animMultiplier = if (series.isAppearing) series.animatedValue else 1 - series.animatedValue
 
             linePaint.color = Color.argb(

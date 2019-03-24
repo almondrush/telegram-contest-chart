@@ -1,5 +1,7 @@
 package com.almondrush
 
+import android.animation.Animator
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Paint
 import android.util.TypedValue
@@ -28,3 +30,24 @@ fun View.setOnRippleClickListener(listener: () -> Unit) {
 }
 
 val Paint.textHeight get() = fontMetrics.bottom - fontMetrics.top + fontMetrics.leading
+
+fun createFloatAnimator(
+    from: Float = 0F,
+    to: Float = 1F,
+    onUpdate: (value: Float) -> Unit,
+    onComplete: ((isCancelled: Boolean) -> Unit)? = null
+) = ValueAnimator.ofFloat(from, to).apply {
+    addUpdateListener { onUpdate(it.animatedValue as Float) }
+    addListener(object: Animator.AnimatorListener {
+        private var isCancelled = false
+        override fun onAnimationRepeat(animation: Animator?) {}
+        override fun onAnimationEnd(animation: Animator?) {
+            onComplete?.invoke(isCancelled)
+            removeAllUpdateListeners()
+        }
+        override fun onAnimationCancel(animation: Animator?) {
+            isCancelled = true
+        }
+        override fun onAnimationStart(animation: Animator?) {}
+    })
+}
