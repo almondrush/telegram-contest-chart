@@ -12,6 +12,9 @@
         <attr name="chartLegendPaddingRight" format="dimension" />
         <attr name="chartLegendXLabelMargin" format="dimension" />
         <attr name="chartLegendXMarginTop" format="dimension" />
+        <attr name="pointInnerRadius" format="dimension" />
+        <attr name="pointOuterRadius" format="dimension" />
+        <attr name="pointInnerColor" format="color" />
     </declare-styleable>
 
     <declare-styleable name="ChartControlView">
@@ -50,6 +53,14 @@
         <attr name="frameThicknessHorizontal" />
         <attr name="frameThicknessVertical" />
         <attr name="additionalFrameTouchWidth" />
+    </declare-styleable>
+
+    <declare-styleable name="ChartXAxisPointerView" parent="ChartControlView">
+        <attr name="chartLegendLineColor" />
+        <attr name="chartLegendLineWidth" />
+        <attr name="pointInnerRadius" />
+        <attr name="pointOuterRadius" />
+        <attr name="pointInnerColor" />
     </declare-styleable>
 
 </resources>

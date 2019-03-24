@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 import com.almondrush.telegramquest.ChartUtil
 import com.almondrush.telegramquest.ChartView
+import com.almondrush.telegramquest.R
 import com.almondrush.telegramquest.XRange
 import com.almondrush.telegramquest.dto.Line
 
@@ -15,8 +16,8 @@ class ChartWithLegendView @JvmOverloads constructor(
     defStyleRes: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr, defStyleRes) {
 
-    private val pRight = 32
-    private val pLeft = 32
+    private var chartPaddingRight = 0
+    private var chartPaddingLeft = 0
 
     private val chart = ChartView(context, attrs, defStyleAttr, defStyleRes)
     private val yAxisView = ChartYAxisView(context, attrs, defStyleAttr, defStyleRes)
@@ -33,6 +34,17 @@ class ChartWithLegendView @JvmOverloads constructor(
         addView(xAxisView)
         addView(xAxisPointerView)
         addView(pointerInfoView)
+
+        context.theme.obtainStyledAttributes(attrs, R.styleable.ChartWithLegendView, defStyleAttr, defStyleRes).apply {
+            try {
+                chartPaddingLeft = getDimensionPixelSize(R.styleable.ChartWithLegendView_chartLegendPaddingLeft, 0)
+                chartPaddingRight = getDimensionPixelSize(R.styleable.ChartWithLegendView_chartLegendPaddingRight, 0)
+            } finally {
+                recycle()
+            }
+        }
+
+
 
         pointerInfoView.setupWith(xAxisPointerView)
     }
@@ -81,31 +93,43 @@ class ChartWithLegendView @JvmOverloads constructor(
         measureChildWithMargins(
             yAxisView,
             widthMeasureSpec,
-            pLeft + pRight,
+            chartPaddingLeft + chartPaddingRight,
             heightMeasureSpec,
             xAxisView.measuredHeight
         )
-        measureChildWithMargins(chart, widthMeasureSpec, pLeft + pRight, heightMeasureSpec, xAxisView.measuredHeight)
+        measureChildWithMargins(
+            chart,
+            widthMeasureSpec,
+            chartPaddingLeft + chartPaddingRight,
+            heightMeasureSpec,
+            xAxisView.measuredHeight
+        )
         measureChildWithMargins(
             pointerInfoView,
             widthMeasureSpec,
-            pLeft + pRight,
+            chartPaddingLeft + chartPaddingRight,
             heightMeasureSpec,
             xAxisView.measuredHeight
         )
-        measureChildWithMargins(xAxisPointerView, widthMeasureSpec, pLeft + pRight, heightMeasureSpec, xAxisView.measuredHeight)
+        measureChildWithMargins(
+            xAxisPointerView,
+            widthMeasureSpec,
+            chartPaddingLeft + chartPaddingRight,
+            heightMeasureSpec,
+            xAxisView.measuredHeight
+        )
         setMeasuredDimension(MeasureSpec.getSize(widthMeasureSpec), MeasureSpec.getSize(heightMeasureSpec))
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        chart.layout(pLeft, 0, chart.measuredWidth + pRight, chart.measuredHeight)
-        yAxisView.layout(pLeft, 0, yAxisView.measuredWidth + pRight, yAxisView.measuredHeight)
+        chart.layout(chartPaddingLeft, 0, chart.measuredWidth + chartPaddingRight, chart.measuredHeight)
+        yAxisView.layout(chartPaddingLeft, 0, yAxisView.measuredWidth + chartPaddingRight, yAxisView.measuredHeight)
         xAxisView.layout(0, height - xAxisView.measuredHeight, xAxisView.measuredWidth, bottom)
-        xAxisPointerView.layout(pLeft, 0, chart.measuredWidth + pRight, chart.measuredHeight)
+        xAxisPointerView.layout(chartPaddingLeft, 0, chart.measuredWidth + chartPaddingRight, chart.measuredHeight)
         pointerInfoView.layout(
-            width - (pRight + pointerInfoView.measuredWidth),
+            width - (chartPaddingRight + pointerInfoView.measuredWidth),
             0,
-            width - pRight,
+            width - chartPaddingRight,
             pointerInfoView.measuredHeight
         )
 

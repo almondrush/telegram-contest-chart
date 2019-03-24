@@ -2,13 +2,13 @@ package com.almondrush.telegramquest.legend
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import com.almondrush.interval
 import com.almondrush.telegramquest.ChartUtil
+import com.almondrush.telegramquest.R
 import com.almondrush.telegramquest.XRange
 import com.almondrush.telegramquest.dto.Line
 import kotlin.math.roundToInt
@@ -23,9 +23,11 @@ internal class ChartXAxisPointerView @JvmOverloads constructor(
 
     var listener: Listener? = null
 
-    private val pointInnerRadius: Float = 10F
-    private val pointOuterRadius: Float = 15F
-    private val pointInnerColor = Color.parseColor("#FFFFFF")
+    private var lineColor: Int = 0
+    private var lineWidth = 0
+    private var pointInnerRadius = 0
+    private var pointOuterRadius = 0
+    private var pointInnerColor = 0
 
     private var touchX: Float? = null
     private var isTouched = false
@@ -41,8 +43,21 @@ internal class ChartXAxisPointerView @JvmOverloads constructor(
     private var chartPoints = emptyArray<ChartPoint>()
 
     init {
-        linePaint.color = Color.parseColor("#333333")
-        linePaint.strokeWidth = 1F
+        context.theme.obtainStyledAttributes(attrs, R.styleable.ChartXAxisPointerView, defStyleAttr, defStyleRes)
+            .apply {
+                try {
+                    lineColor = getColor(R.styleable.ChartXAxisPointerView_chartLegendLineColor, 0)
+                    lineWidth = getDimensionPixelSize(R.styleable.ChartXAxisPointerView_chartLegendLineWidth, 0)
+                    pointInnerRadius = getDimensionPixelSize(R.styleable.ChartXAxisPointerView_pointInnerRadius, 0)
+                    pointOuterRadius = getDimensionPixelSize(R.styleable.ChartXAxisPointerView_pointOuterRadius, 0)
+                    pointInnerColor = getColor(R.styleable.ChartXAxisPointerView_pointInnerColor, 0xFFFFFF)
+                } finally {
+                    recycle()
+                }
+            }
+
+        linePaint.color = lineColor
+        linePaint.strokeWidth = lineWidth.toFloat()
         pointPaint.style = Paint.Style.FILL
     }
 
@@ -131,9 +146,9 @@ internal class ChartXAxisPointerView @JvmOverloads constructor(
 
     private fun Canvas.drawChartPoint(x: Float, y: Float, color: Int) {
         pointPaint.color = color
-        drawCircle(x, height - y, pointOuterRadius, pointPaint)
+        drawCircle(x, height - y, pointOuterRadius.toFloat(), pointPaint)
         pointPaint.color = pointInnerColor
-        drawCircle(x, height - y, pointInnerRadius, pointPaint)
+        drawCircle(x, height - y, pointInnerRadius.toFloat(), pointPaint)
     }
 
     private data class ChartPoint(var color: Int, var x: Int = 0, var y: Int = 0, var time: Long = 0, var value: Long = 0)

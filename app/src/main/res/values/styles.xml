@@ -20,6 +20,9 @@
         <item name="chartLegendPaddingRight">16dp</item>
         <item name="chartLegendXLabelMargin">4dp</item>
         <item name="chartLegendXMarginTop">4dp</item>
+        <item name="pointInnerRadius">3dp</item>
+        <item name="pointOuterRadius">5dp</item>
+        <item name="pointInnerColor">@color/chart_point_inner_color</item>
     </style>
 
     <style name="AppTheme.ChartControl">

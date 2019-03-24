@@ -9,4 +9,5 @@
     <color name="legend_text_color">#BBBBBB</color>
     <color name="chart_control_frame">#38416990</color>
     <color name="chart_control_frame_dim">#14416990</color>
+    <color name="chart_point_inner_color">#FFFFFF</color>
 </resources>

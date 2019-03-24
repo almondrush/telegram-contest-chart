@@ -14,7 +14,7 @@ import com.almondrush.textHeight
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
-class ChartYAxisView @JvmOverloads constructor(
+internal class ChartYAxisView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet,
     defStyleAttr: Int = 0,
@@ -27,7 +27,7 @@ class ChartYAxisView @JvmOverloads constructor(
 
     private var lineColor: Int = 0
     private var labelCount = 0
-    private var lineWidth = 0F
+    private var lineWidth = 0
     private var textColor = 0
     private var textSize = 0F
     private var textBottomMargin = 0F
@@ -52,7 +52,7 @@ class ChartYAxisView @JvmOverloads constructor(
             try {
                 lineColor = getColor(R.styleable.ChartYAxisView_chartLegendLineColor, 0)
                 labelCount = getInteger(R.styleable.ChartYAxisView_chartLegendYLineCount, 6)
-                lineWidth = getDimension(R.styleable.ChartYAxisView_chartLegendLineWidth, 1F)
+                lineWidth = getDimensionPixelSize(R.styleable.ChartYAxisView_chartLegendLineWidth, 1)
                 lineColor = getColor(R.styleable.ChartYAxisView_chartLegendLineColor, 0)
                 textColor = getColor(R.styleable.ChartYAxisView_chartLegendLabelTextColor, 0)
                 textSize = getDimension(R.styleable.ChartYAxisView_chartLegendLabelTextSize, 0F)
@@ -64,7 +64,7 @@ class ChartYAxisView @JvmOverloads constructor(
 
         linePaint.style = Paint.Style.STROKE
         linePaint.color = lineColor
-        linePaint.strokeWidth = lineWidth
+        linePaint.strokeWidth = lineWidth.toFloat()
         textPaint.color = textColor
         textPaint.textSize = textSize
     }
