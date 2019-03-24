@@ -10,13 +10,11 @@ import android.graphics.Path
 import android.graphics.PointF
 import android.graphics.Rect
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import com.almondrush.dpToPx
 import com.almondrush.telegramquest.dto.Line
 import com.almondrush.telegramquest.dto.LinePx
 import com.almondrush.telegramquest.dto.PointL
-import kotlin.system.measureTimeMillis
 
 class ChartView @JvmOverloads constructor(
     context: Context,
@@ -139,25 +137,20 @@ class ChartView @JvmOverloads constructor(
     }
 
     override fun onDraw(canvas: Canvas) {
-        measureTimeMillis {
-            animatingLinesPx = animatingLines.map {
-                AnimatingLinePx(calculatePixelValues(it.line, xRange, maxY, pathRect), it.isAppearing, it.value)
-            }
+        animatingLinesPx = animatingLines.map {
+            AnimatingLinePx(calculatePixelValues(it.line, xRange, maxY, pathRect), it.isAppearing, it.value)
+        }
 
-            animatingLinesPx.forEach { animatingLine ->
-                path.rewind()
-                val animMultiplier = if (animatingLine.appearing) animatingLine.value else 1 - animatingLine.value
-                val color = animatingLine.line.color
-                paint.color =
-                    Color.argb((255 * animMultiplier).toInt(), Color.red(color), Color.green(color), Color.blue(color))
-                animatingLine.line.data.forEachIndexed { index, point ->
-                    if (index == 0) path.moveTo(point.x, point.y) else path.lineTo(point.x, point.y)
-                }
-                canvas.drawPath(path, paint)
+        animatingLinesPx.forEach { animatingLine ->
+            path.rewind()
+            val animMultiplier = if (animatingLine.appearing) animatingLine.value else 1 - animatingLine.value
+            val color = animatingLine.line.color
+            paint.color =
+                Color.argb((255 * animMultiplier).toInt(), Color.red(color), Color.green(color), Color.blue(color))
+            animatingLine.line.data.forEachIndexed { index, point ->
+                if (index == 0) path.moveTo(point.x, point.y) else path.lineTo(point.x, point.y)
             }
-
-        }.let {
-            Log.v("CHART_ESTIMATE", "Estimate draw: $it")
+            canvas.drawPath(path, paint)
         }
     }
 

@@ -61,7 +61,7 @@ class ChartWithLegendView @JvmOverloads constructor(
         xAxisPointerView.setLines(lines)
         pointerInfoView.setLines(lines)
 
-        setFullTimeRangeToChildren(ChartUtil.getTimeRange(lines))
+        setFullTimeRangeToChildren(getTimeRange(lines))
         setData(lines, xRange)
     }
 
@@ -86,6 +86,13 @@ class ChartWithLegendView @JvmOverloads constructor(
     private fun setFullTimeRangeToChildren(range: LongRange) {
         xAxisView.setFullTimeRange(range)
         xAxisPointerView.setFullTimeRange(range)
+    }
+
+    private fun getTimeRange(lines: List<Line>): LongRange {
+        if (lines.isEmpty()) return 0L..0L
+        val startTime = requireNotNull(lines.map { it.data.first() }.minBy { it.x }).x
+        val endTime = requireNotNull(lines.map { it.data.last() }.maxBy { it.x }).x
+        return startTime..endTime
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
