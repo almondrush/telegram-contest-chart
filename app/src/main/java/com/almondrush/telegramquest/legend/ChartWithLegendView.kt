@@ -2,9 +2,7 @@ package com.almondrush.telegramquest.legend
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.ViewGroup
 import android.widget.FrameLayout
-import com.almondrush.dpToInt
 import com.almondrush.telegramquest.ChartUtil
 import com.almondrush.telegramquest.ChartView
 import com.almondrush.telegramquest.XRange
@@ -17,6 +15,10 @@ class ChartWithLegendView @JvmOverloads constructor(
     defStyleRes: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr, defStyleRes) {
 
+    companion object {
+        private const val MAX_Y_ANIMATION_DURATION_MS = 3000L
+    }
+
     private val pRight = 32
     private val pLeft = 32
 
@@ -25,7 +27,6 @@ class ChartWithLegendView @JvmOverloads constructor(
     private val xAxisView = ChartXAxisView(context, attrs, defStyleAttr, defStyleRes)
     private val xAxisPointerView = ChartXAxisPointerView(context, attrs, defStyleAttr, defStyleRes)
     private val pointerInfoView = ChartPointerInfoView(context, attrs, defStyleAttr, defStyleRes)
-
 
     private var lines: List<Line> = emptyList()
 

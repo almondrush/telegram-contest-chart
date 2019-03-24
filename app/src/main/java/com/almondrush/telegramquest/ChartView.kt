@@ -1,5 +1,7 @@
 package com.almondrush.telegramquest
 
+import android.animation.Animator
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
@@ -19,6 +21,10 @@ class ChartView @JvmOverloads constructor(
     defStyleRes: Int = 0
 ) : View(context, attrs, defStyleAttr, defStyleRes) {
 
+    companion object {
+        private const val ANIMATION_DURATION_MS = 300L
+    }
+
     private val paint = Paint()
     private val path = Path()
     private val pathRect: Rect = Rect()
@@ -33,6 +39,9 @@ class ChartView @JvmOverloads constructor(
 
     private var linesPx: List<LinePx> = emptyList()
 
+    private var targetMaxY = 0L
+    private val maxYAnimator = createFloatAnimator()
+
     init {
         initPaint()
     }
@@ -43,10 +52,21 @@ class ChartView @JvmOverloads constructor(
         invalidate()
     }
 
-    fun setMaxY(y: Long) {
-        maxY = y
-        shouldUpdate = true
-        invalidate()
+    fun setMaxY(newMaxY: Long) {
+        if (targetMaxY != newMaxY) {
+            maxYAnimator.cancel()
+            targetMaxY = newMaxY
+            val oldMaxY = maxY
+            val distance = newMaxY - maxY
+            maxYAnimator.addUpdateListener { animator ->
+                val value = animator.animatedValue as Float
+                maxY = (oldMaxY + distance * value).toLong()
+                L.d(maxY)
+                shouldUpdate = true
+                invalidate()
+            }
+            maxYAnimator.start()
+        }
     }
 
     fun setXRange(range: IntRange) {
@@ -96,5 +116,19 @@ class ChartView @JvmOverloads constructor(
             strokeWidth = lineWidth
             isAntiAlias = true
         }
+    }
+
+    private fun createFloatAnimator() = ValueAnimator.ofFloat(0F, 1F).apply {
+        duration = ANIMATION_DURATION_MS
+        addListener(object: Animator.AnimatorListener {
+            override fun onAnimationRepeat(animation: Animator?) {}
+
+            override fun onAnimationEnd(animation: Animator?) { removeAllUpdateListeners() }
+
+            override fun onAnimationCancel(animation: Animator?) { removeAllUpdateListeners() }
+
+            override fun onAnimationStart(animation: Animator?) {}
+        })
+        start()
     }
 }
