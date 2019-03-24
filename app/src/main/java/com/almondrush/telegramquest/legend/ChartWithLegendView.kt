@@ -7,6 +7,7 @@ import com.almondrush.telegramquest.ChartUtil
 import com.almondrush.telegramquest.ChartView
 import com.almondrush.telegramquest.XRange
 import com.almondrush.telegramquest.dto.Line
+import kotlin.jvm.internal.Intrinsics
 
 class ChartWithLegendView @JvmOverloads constructor(
     context: Context,
@@ -28,6 +29,7 @@ class ChartWithLegendView @JvmOverloads constructor(
     private val xAxisPointerView = ChartXAxisPointerView(context, attrs, defStyleAttr, defStyleRes)
     private val pointerInfoView = ChartPointerInfoView(context, attrs, defStyleAttr, defStyleRes)
 
+    private var xRange: IntRange = XRange.FULL
     private var lines: List<Line> = emptyList()
 
     init {
@@ -43,6 +45,7 @@ class ChartWithLegendView @JvmOverloads constructor(
     }
 
     fun setXRange(xRange: IntRange) {
+        this.xRange = xRange
         setData(lines, xRange)
     }
 
@@ -54,7 +57,7 @@ class ChartWithLegendView @JvmOverloads constructor(
         pointerInfoView.setLines(lines)
 
         setFullTimeRangeToChildren(ChartUtil.getTimeRange(lines))
-        setData(lines, XRange.FULL)
+        setData(lines, xRange)
     }
 
     private fun setData(lines: List<Line>, xRange: IntRange) {

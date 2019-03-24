@@ -132,6 +132,7 @@ internal class ChartXAxisView @JvmOverloads constructor(
     private fun getDayString(time: Long) = dateFormat.format(Date(time))
 
     private fun findDays(fullTimeRange: LongRange, dayStep: Int): List<Long> {
+        if (fullTimeRange.interval == 0L) return emptyList()
         var currentDay = findNextDay(fullTimeRange.start, fullTimeRange.endInclusive)
         val days = mutableListOf<Long>()
         while (currentDay != null) {

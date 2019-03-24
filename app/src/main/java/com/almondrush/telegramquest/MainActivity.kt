@@ -19,6 +19,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var controlView: ChartControlView
     lateinit var chartLabels: ViewGroup
 
+    private var enabledLinesMap = mutableMapOf<Line, Boolean>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -37,15 +39,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setLines(lines: List<Line>) {
+        enabledLinesMap = lines.associateWith { true }.toMutableMap()
+        createLabels(lines)
+        updateChild()
+    }
+
+    private fun updateChild() {
+        val lines = enabledLinesMap.mapNotNull { (line, isEnabled) -> if (isEnabled) line else null }
         chartView.setLines(lines)
         controlView.setLines(lines)
-        createLabels(lines)
     }
 
     private fun onLabelClick(line: Line) {
-        line.isEnabled = !line.isEnabled
+        val isEnabled = enabledLinesMap[line]!!
+        enabledLinesMap[line] = !isEnabled
+        updateChild()
     }
-
 
     private fun createLabels(lines: List<Line>) {
         lines.mapIndexed { index, line ->
@@ -60,14 +69,14 @@ class MainActivity : AppCompatActivity() {
         val textView: TextView = view.findViewById(R.id.chart_label_text)
         val divider: View = view.findViewById(R.id.chart_label_divider)
 
-        checkBox.isChecked = line.isEnabled
+        checkBox.isChecked = enabledLinesMap[line]!!
         val states = arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf())
         val colors = intArrayOf(line.color, line.color)
         checkBox.buttonTintList = ColorStateList(states, colors)
         textView.text = line.name
         view.setOnRippleClickListener {
             onLabelClick(line)
-            checkBox.isChecked = line.isEnabled
+            checkBox.isChecked = enabledLinesMap[line]!!
         }
         divider.visibility = if (isDividerEnabled) View.VISIBLE else View.GONE
 
