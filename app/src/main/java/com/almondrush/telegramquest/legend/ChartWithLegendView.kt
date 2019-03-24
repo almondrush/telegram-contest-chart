@@ -7,7 +7,6 @@ import com.almondrush.telegramquest.ChartUtil
 import com.almondrush.telegramquest.ChartView
 import com.almondrush.telegramquest.XRange
 import com.almondrush.telegramquest.dto.Line
-import kotlin.jvm.internal.Intrinsics
 
 class ChartWithLegendView @JvmOverloads constructor(
     context: Context,
@@ -17,7 +16,7 @@ class ChartWithLegendView @JvmOverloads constructor(
 ) : FrameLayout(context, attrs, defStyleAttr, defStyleRes) {
 
     companion object {
-        private const val MAX_Y_ANIMATION_DURATION_MS = 3000L
+        private const val ANIMATION_DURATION_MS = 300L
     }
 
     private val pRight = 32

@@ -12,6 +12,7 @@ import com.almondrush.telegramquest.BuildConfig
 import com.almondrush.telegramquest.ChartUtil
 import com.almondrush.telegramquest.L
 import com.almondrush.telegramquest.XRange
+import com.almondrush.textHeight
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -84,7 +85,7 @@ internal class ChartXAxisView @JvmOverloads constructor(
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         val fontMetrics = textPaint.fontMetrics
         textTop = -fontMetrics.top
-        textLineHeight = fontMetrics.bottom - fontMetrics.top + fontMetrics.leading
+        textLineHeight = textPaint.textHeight
 
         textLabelWidth = textPaint.measureText(LABEL_TEXT_TO_MEASURE)
 

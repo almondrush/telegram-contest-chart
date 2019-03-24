@@ -1,6 +1,7 @@
 package com.almondrush
 
 import android.content.Context
+import android.graphics.Paint
 import android.util.TypedValue
 import android.view.View
 
@@ -25,3 +26,5 @@ fun View.setOnRippleClickListener(listener: () -> Unit) {
         handler.postDelayed(listener, 150)
     }
 }
+
+val Paint.textHeight get() = fontMetrics.bottom - fontMetrics.top + fontMetrics.leading

@@ -34,11 +34,9 @@ class ChartView @JvmOverloads constructor(
 
     private var lineWidth: Float = 5F
 
-    private var shouldUpdate: Boolean = true
-
     private var xRange: IntRange = XRange.FULL
-    private var maxY = 0L
 
+    private var maxY = 0L
     private var targetMaxY = 0L
     private val maxYAnimator = createFloatAnimator()
 
@@ -54,7 +52,6 @@ class ChartView @JvmOverloads constructor(
 
     fun setXRange(range: IntRange) {
         xRange = range
-        shouldUpdate = true
         invalidate()
     }
 
@@ -86,10 +83,8 @@ class ChartView @JvmOverloads constructor(
             linesAnimator.addUpdateListener { animator ->
                 val animatedValue = animator.animatedValue as Float
                 animatingLines.forEach {
-                    L.d(animatingLines.map { it.line.name to it.value })
                     if (it.value <= animatedValue) {
                         it.value = animatedValue
-                        shouldUpdate = true
                         invalidate()
                     }
                 }
@@ -109,7 +104,6 @@ class ChartView @JvmOverloads constructor(
                 val animatedMaxY = (oldMaxY + distance * value).toLong()
                 if (animatedMaxY != maxY) {
                     maxY = animatedMaxY
-                    shouldUpdate = true
                     invalidate()
                 }
             }
@@ -128,16 +122,12 @@ class ChartView @JvmOverloads constructor(
             pathRect.right - strokePadding,
             pathRect.bottom + strokePadding
         )
-        shouldUpdate = true
     }
 
     override fun onDraw(canvas: Canvas) {
         measureTimeMillis {
-            if (shouldUpdate) {
-                animatingLinesPx = animatingLines.map {
-                    AnimatingLinePx(calculatePixelValues(it.line, xRange, maxY, pathRect), it.isAppearing, it.value)
-                }
-                shouldUpdate = false
+            animatingLinesPx = animatingLines.map {
+                AnimatingLinePx(calculatePixelValues(it.line, xRange, maxY, pathRect), it.isAppearing, it.value)
             }
 
             animatingLinesPx.forEach { animatingLine ->
