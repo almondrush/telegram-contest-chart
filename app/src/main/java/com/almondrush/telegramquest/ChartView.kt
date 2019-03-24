@@ -12,6 +12,7 @@ import android.graphics.Rect
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import com.almondrush.dpToPx
 import com.almondrush.telegramquest.dto.Line
 import com.almondrush.telegramquest.dto.LinePx
 import com.almondrush.telegramquest.dto.PointL
@@ -26,13 +27,14 @@ class ChartView @JvmOverloads constructor(
 
     companion object {
         private const val ANIMATION_DURATION_MS = 300L
+        private const val DEFAULT_LINE_WIDTH_DP = 2
     }
 
     private val paint = Paint()
     private val path = Path()
     private val pathRect: Rect = Rect()
 
-    private var lineWidth: Float = 5F
+    private var lineWidth = 0
 
     private var xRange: IntRange = XRange.FULL
 
@@ -47,7 +49,19 @@ class ChartView @JvmOverloads constructor(
     })
 
     init {
-        initPaint()
+        context.theme.obtainStyledAttributes(attrs, R.styleable.ChartView, defStyleAttr, defStyleRes).apply {
+            try {
+                val defaultWidth = DEFAULT_LINE_WIDTH_DP.dpToPx(context).toInt()
+                lineWidth = getDimensionPixelSize(R.styleable.ChartView_chartLineWidth, defaultWidth )
+            } finally {
+                recycle()
+            }
+        }
+        paint.apply {
+            style = Paint.Style.STROKE
+            strokeWidth = lineWidth.toFloat()
+            isAntiAlias = true
+        }
     }
 
     fun setXRange(range: IntRange) {
@@ -144,14 +158,6 @@ class ChartView @JvmOverloads constructor(
 
         }.let {
             Log.v("CHART_ESTIMATE", "Estimate draw: $it")
-        }
-    }
-
-    private fun initPaint() {
-        paint.apply {
-            style = Paint.Style.STROKE
-            strokeWidth = lineWidth
-            isAntiAlias = true
         }
     }
 

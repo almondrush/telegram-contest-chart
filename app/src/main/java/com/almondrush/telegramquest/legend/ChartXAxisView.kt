@@ -11,6 +11,7 @@ import com.almondrush.interval
 import com.almondrush.telegramquest.BuildConfig
 import com.almondrush.telegramquest.ChartUtil
 import com.almondrush.telegramquest.L
+import com.almondrush.telegramquest.R
 import com.almondrush.telegramquest.XRange
 import com.almondrush.textHeight
 import java.text.SimpleDateFormat
@@ -34,13 +35,13 @@ internal class ChartXAxisView @JvmOverloads constructor(
 
     private val dateFormat = SimpleDateFormat(DATE_PATTERN, context.resources.configuration.locale)
 
-    private var chartPaddingLeft: Int = 0
-    private var chartPaddingRight: Int = 0
-    private val labelMargin = 15
+    private var textSize = 0F
+    private var textColor = 0
+    private var chartPaddingLeft = 0
+    private var chartPaddingRight = 0
+    private var labelMargin = 0
+    private var textMarginTop = 0
 
-    private val textMarginTop: Int = 0
-    private val textSize = 20F
-    private val textColor = Color.parseColor("#888888")
     private val textPaint = Paint()
 
     private var textLineHeight = 0F
@@ -49,16 +50,33 @@ internal class ChartXAxisView @JvmOverloads constructor(
 
     private val measureRect = Rect()
     private val drawingRect = Rect()
+
     private var xRange: IntRange = XRange.FULL
     private lateinit var fullTimeRange: LongRange
     private lateinit var timeRange: LongRange
+
     private var labelsCount: Float = 0F
+
     private lateinit var timeOfDaysToShow: List<Long>
+
     private var dayStep: Int by Delegates.observable(0) {_, oldValue, newValue ->
         if (oldValue != newValue) timeOfDaysToShow = findDays(fullTimeRange, dayStep)
     }
 
     init {
+        context.theme.obtainStyledAttributes(attrs, R.styleable.ChartXAxisView, defStyleAttr, defStyleRes).apply {
+            try {
+                textColor = getColor(R.styleable.ChartXAxisView_chartLegendLabelTextColor, 0)
+                textSize = getDimension(R.styleable.ChartXAxisView_chartLegendLabelTextSize, 0F)
+                chartPaddingLeft = getDimensionPixelSize(R.styleable.ChartXAxisView_chartLegendPaddingLeft, 0)
+                chartPaddingRight = getDimensionPixelSize(R.styleable.ChartXAxisView_chartLegendPaddingRight, 0)
+                labelMargin = getDimensionPixelSize(R.styleable.ChartXAxisView_chartLegendXLabelMargin, 0)
+                textMarginTop = getDimensionPixelSize(R.styleable.ChartXAxisView_chartLegendXMarginTop, 0)
+            } finally {
+                recycle()
+            }
+        }
+
         textPaint.color = textColor
         textPaint.textSize = textSize
     }
@@ -117,7 +135,6 @@ internal class ChartXAxisView @JvmOverloads constructor(
         val pixelValues = convertTimeToPixelValues(timeOfDaysToShow, timeRange)
         val spaceBetweenLabels = getDistanceBetweenLabels(pixelValues)
         val alpha = Math.min(spaceBetweenLabels / (labelWidth + labelMargin), 1.0F)
-        L.d("alpha $alpha")
 
         pixelValues.mapIndexed { index, value -> value to getDayString(timeOfDaysToShow[index]) }
             .forEachIndexed { index, (x, label) ->
@@ -135,19 +152,12 @@ internal class ChartXAxisView @JvmOverloads constructor(
             }
     }
 
-    fun getDistanceBetweenLabels(xValues: List<Int>): Float {
+    private fun getDistanceBetweenLabels(xValues: List<Int>): Float {
         return if (xValues.size < 3) {
-            labelWidth
+            labelWidth + labelMargin
         } else {
-            L.d("left ${xValues[2]} right ${xValues[0]} lawidth $labelWidth")
             (xValues[2] - xValues[0].toFloat() - 2 * (labelWidth + labelMargin)) / 2
         }
-    }
-
-    internal fun setChartPadding(left: Int, right: Int) {
-        chartPaddingLeft = left
-        chartPaddingRight = right
-        updateTimeRange()
     }
 
     private fun convertTimeToPixelValues(days: List<Long>, timeRange: LongRange): List<Int> {

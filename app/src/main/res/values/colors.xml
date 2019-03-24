@@ -5,4 +5,8 @@
     <color name="colorAccent">#D81B60</color>
     <color name="black">#000000</color>
     <color name="text_blue">#2980C9</color>
+    <color name="legend_line_color">#EBF0F3</color>
+    <color name="legend_text_color">#BBBBBB</color>
+    <color name="chart_control_frame">#38416990</color>
+    <color name="chart_control_frame_dim">#14416990</color>
 </resources>

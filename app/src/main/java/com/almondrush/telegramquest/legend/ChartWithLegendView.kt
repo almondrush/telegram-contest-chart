@@ -15,10 +15,6 @@ class ChartWithLegendView @JvmOverloads constructor(
     defStyleRes: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr, defStyleRes) {
 
-    companion object {
-        private const val ANIMATION_DURATION_MS = 300L
-    }
-
     private val pRight = 32
     private val pLeft = 32
 
@@ -39,8 +35,6 @@ class ChartWithLegendView @JvmOverloads constructor(
         addView(pointerInfoView)
 
         pointerInfoView.setupWith(xAxisPointerView)
-
-        xAxisView.setChartPadding(pLeft, pRight)
     }
 
     fun setXRange(xRange: IntRange) {

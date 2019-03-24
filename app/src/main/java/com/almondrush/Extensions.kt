@@ -19,7 +19,7 @@ val IntRange.interval get() = endInclusive - start
 
 val LongRange.interval get() = endInclusive - start
 
-fun Number.dpToInt(context: Context): Float {
+fun Number.dpToPx(context: Context): Float {
     return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, this.toFloat(), context.resources.displayMetrics)
 }
 

@@ -9,7 +9,7 @@ import android.graphics.Paint
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
-import com.almondrush.telegramquest.L
+import com.almondrush.telegramquest.R
 import com.almondrush.textHeight
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
@@ -25,20 +25,19 @@ class ChartYAxisView @JvmOverloads constructor(
         private const val ANIMATION_DURATION_MS = 300L
     }
 
-    private val lineColor = Color.rgb(200, 200, 200)
-    private val linePaint = Paint()
+    private var lineColor: Int = 0
+    private var labelCount = 0
+    private var lineWidth = 0F
+    private var textColor = 0
+    private var textSize = 0F
+    private var textBottomMargin = 0F
 
-    private val textColor = Color.rgb(130, 130, 130)
+    private val linePaint = Paint()
     private val textPaint = Paint()
-    private val textSize = 32F
-    private val textBottomMargin = 12
 
     private val drawingRect = Rect()
 
-    private val labelCount = 6
-
     private var labelPositionsPx: List<Int> = emptyList()
-
     private var labelSeries = mutableListOf<LabelSeries>()
 
     private var maxY = 0L
@@ -49,8 +48,23 @@ class ChartYAxisView @JvmOverloads constructor(
     })
 
     init {
+        context.theme.obtainStyledAttributes(attrs, R.styleable.ChartYAxisView, defStyleAttr, defStyleRes).apply {
+            try {
+                lineColor = getColor(R.styleable.ChartYAxisView_chartLegendLineColor, 0)
+                labelCount = getInteger(R.styleable.ChartYAxisView_chartLegendYLineCount, 6)
+                lineWidth = getDimension(R.styleable.ChartYAxisView_chartLegendLineWidth, 1F)
+                lineColor = getColor(R.styleable.ChartYAxisView_chartLegendLineColor, 0)
+                textColor = getColor(R.styleable.ChartYAxisView_chartLegendLabelTextColor, 0)
+                textSize = getDimension(R.styleable.ChartYAxisView_chartLegendLabelTextSize, 0F)
+                textBottomMargin = getDimension(R.styleable.ChartYAxisView_chartLegendLineToLabelMargin, 0f)
+            } finally {
+                recycle()
+            }
+        }
+
         linePaint.style = Paint.Style.STROKE
         linePaint.color = lineColor
+        linePaint.strokeWidth = lineWidth
         textPaint.color = textColor
         textPaint.textSize = textSize
     }
@@ -151,7 +165,7 @@ class ChartYAxisView @JvmOverloads constructor(
     }
 
     private fun Canvas.drawHorizontalLine(y: Float, paint: Paint) {
-        drawLine(0F, y, width.toFloat(), y, paint)
+        drawLine(0F, y - 1, width.toFloat(), y - 1, paint)
     }
 
     private data class LabelSeries(

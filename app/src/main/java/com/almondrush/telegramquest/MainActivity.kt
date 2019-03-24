@@ -15,9 +15,9 @@ import com.almondrush.telegramquest.legend.ChartWithLegendView
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var chartView: ChartWithLegendView
-    lateinit var controlView: ChartControlView
-    lateinit var chartLabels: ViewGroup
+    private lateinit var chartView: ChartWithLegendView
+    private lateinit var controlView: ChartControlView
+    private lateinit var chartLabels: ViewGroup
 
     private var enabledLinesMap = mutableMapOf<Line, Boolean>()
 

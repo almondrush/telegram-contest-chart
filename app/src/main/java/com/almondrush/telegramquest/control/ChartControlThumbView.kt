@@ -2,7 +2,6 @@ package com.almondrush.telegramquest.control
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
@@ -10,6 +9,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import com.almondrush.center
+import com.almondrush.telegramquest.R
 import com.almondrush.telegramquest.XRange
 import kotlin.math.roundToInt
 import kotlin.properties.Delegates
@@ -21,8 +21,11 @@ internal class ChartControlThumbView @JvmOverloads constructor(
     defStyleRes: Int = 0
 ) : View(context, attrs, defStyleAttr, defStyleRes) {
 
-    private var thumbColor = Color.argb(0x44, 0x41, 0x69, 0x90)
-    private var fogColor = Color.argb(0x11, 0x41, 0x69, 0x90)
+    private var frameColor = 0
+    private var dimColor = 0
+    private var frameThicknessHorizontal = 0
+    private var frameThicknessVertical = 0
+    private var additionalTouchWidth = 0
 
     private val paint = Paint()
     private val path = Path()
@@ -41,9 +44,6 @@ internal class ChartControlThumbView @JvmOverloads constructor(
 
     private var pixelsPerXRangeUnit: Float = 0F
 
-    private var frameWidth = 4
-    private var thumbWidth = 16
-
     private var drawingRect = RectF()
     private var outerRect = RectF()
     private var innerRect = RectF()
@@ -51,6 +51,24 @@ internal class ChartControlThumbView @JvmOverloads constructor(
     private var tracking = Trackable.NOTHING
 
     private var touchOffsetFromCenter = 0F
+
+    init {
+        context.theme.obtainStyledAttributes(attrs, R.styleable.ChartControlThumbView, defStyleAttr, defStyleRes)
+            .apply {
+                try {
+                    frameColor = getColor(R.styleable.ChartControlThumbView_frameColor, 0x55000000)
+                    dimColor = getColor(R.styleable.ChartControlThumbView_dimColor, 0x22000000)
+                    frameThicknessHorizontal =
+                        getDimensionPixelSize(R.styleable.ChartControlThumbView_frameThicknessHorizontal, 0)
+                    frameThicknessVertical =
+                        getDimensionPixelSize(R.styleable.ChartControlThumbView_frameThicknessVertical, 0)
+                    additionalTouchWidth =
+                        getDimensionPixelSize(R.styleable.ChartControlThumbView_additionalFrameTouchWidth, 0)
+                } finally {
+                    recycle()
+                }
+            }
+    }
 
     private fun setXRange(start: Int = xRange.start, end: Int = xRange.endInclusive) {
         xRange = start..end
@@ -64,12 +82,12 @@ internal class ChartControlThumbView @JvmOverloads constructor(
     }
 
     private fun setLeftThumbTo(x: Float) {
-        val dxLeftThumb = (x - thumbWidth / 2) - xRangePixels.start
+        val dxLeftThumb = (x - frameThicknessVertical / 2) - xRangePixels.start
         calculateAndSet(dxLeftThumb, 0F, true)
     }
 
     private fun setRightThumbTo(x: Float) {
-        val dxRightThumb = (x + thumbWidth / 2) - xRangePixels.endInclusive
+        val dxRightThumb = (x + frameThicknessVertical / 2) - xRangePixels.endInclusive
         calculateAndSet(0F, dxRightThumb, true)
     }
 
@@ -160,8 +178,8 @@ internal class ChartControlThumbView @JvmOverloads constructor(
     private fun onActionDown(event: MotionEvent) {
         val eventX = event.x
         val leftThumbStart = xRangePixels.start
-        val leftThumbEnd = xRangePixels.start + thumbWidth
-        val rightThumbStart = xRangePixels.endInclusive - thumbWidth
+        val leftThumbEnd = xRangePixels.start + frameThicknessVertical
+        val rightThumbStart = xRangePixels.endInclusive - frameThicknessVertical
         val rightThumbEnd = xRangePixels.endInclusive
 
         tracking = when {
@@ -169,8 +187,8 @@ internal class ChartControlThumbView @JvmOverloads constructor(
                 setLeftThumbTo(eventX)
                 Trackable.LEFT_THUMB
             }
-            eventX <= leftThumbEnd -> Trackable.LEFT_THUMB
-            eventX < rightThumbStart -> {
+            eventX <= leftThumbEnd + additionalTouchWidth -> Trackable.LEFT_THUMB
+            eventX < rightThumbStart - additionalTouchWidth -> {
                 touchOffsetFromCenter = event.x - getFrameCenter()
                 Trackable.FRAME
             }
@@ -202,14 +220,14 @@ internal class ChartControlThumbView @JvmOverloads constructor(
             drawingRect.bottom
         )
         innerRect.set(
-            outerRect.left + thumbWidth,
-            outerRect.top + frameWidth,
-            outerRect.right - thumbWidth,
-            outerRect.bottom - frameWidth
+            outerRect.left + frameThicknessVertical,
+            outerRect.top + frameThicknessHorizontal,
+            outerRect.right - frameThicknessVertical,
+            outerRect.bottom - frameThicknessHorizontal
         )
 
         // Draw frame
-        paint.color = thumbColor
+        paint.color = frameColor
         paint.style = Paint.Style.FILL
         path.rewind()
         path.moveTo(outerRect.left, outerRect.top)
@@ -219,7 +237,7 @@ internal class ChartControlThumbView @JvmOverloads constructor(
         canvas.drawPath(path, paint)
 
         // Draw left and right fog
-        paint.color = fogColor
+        paint.color = dimColor
         canvas.drawRect(drawingRect.left, drawingRect.top, outerRect.left, drawingRect.bottom, paint)
         canvas.drawRect(outerRect.right, drawingRect.top, drawingRect.right, drawingRect.bottom, paint)
 

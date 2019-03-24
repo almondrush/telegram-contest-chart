@@ -8,4 +8,27 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="AppTheme.ChartWithLegend">
+        <item name="chartLineWidth">2dp</item>
+        <item name="chartLegendLineColor">@color/legend_line_color</item>
+        <item name="chartLegendLabelTextColor">@color/legend_text_color</item>
+        <item name="chartLegendLabelTextSize">13sp</item>
+        <item name="chartLegendLineToLabelMargin">6dp</item>
+        <item name="chartLegendYLineCount">6</item>
+        <item name="chartLegendLineWidth">1dp</item>
+        <item name="chartLegendPaddingLeft">16dp</item>
+        <item name="chartLegendPaddingRight">16dp</item>
+        <item name="chartLegendXLabelMargin">4dp</item>
+        <item name="chartLegendXMarginTop">4dp</item>
+    </style>
+
+    <style name="AppTheme.ChartControl">
+        <item name="chartLineWidth">1dp</item>
+        <item name="frameColor">@color/chart_control_frame</item>
+        <item name="dimColor">@color/chart_control_frame_dim</item>
+        <item name="frameThicknessHorizontal">1dp</item>
+        <item name="frameThicknessVertical">6dp</item>
+        <item name="additionalFrameTouchWidth">6dp</item>
+    </style>
+
 </resources>

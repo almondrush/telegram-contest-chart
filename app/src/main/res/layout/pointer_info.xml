@@ -10,7 +10,7 @@
     android:layout_margin="16dp"
     android:paddingTop="8dp"
     android:paddingBottom="8dp"
-    android:elevation="4dp">
+    android:elevation="1dp">
 
     <TextView
         android:id="@+id/pointer_info_date"

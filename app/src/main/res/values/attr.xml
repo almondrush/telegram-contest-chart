@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="ChartWithLegendView">
+        <attr name="chartLegendLineColor" format="color" />
+        <attr name="chartLegendLineToLabelMargin" format="dimension" />
+        <attr name="chartLegendYLineCount" format="integer" />
+        <attr name="chartLegendLineWidth" format="dimension" />
+        <attr name="chartLegendLabelTextColor" format="color" />
+        <attr name="chartLegendLabelTextSize" format="dimension" />
+        <attr name="chartLegendPaddingLeft" format="dimension" />
+        <attr name="chartLegendPaddingRight" format="dimension" />
+        <attr name="chartLegendXLabelMargin" format="dimension" />
+        <attr name="chartLegendXMarginTop" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="ChartControlView">
+        <attr name="frameColor" format="color" />
+        <attr name="dimColor" format="color" />
+        <attr name="frameThicknessHorizontal" format="dimension" />
+        <attr name="frameThicknessVertical" format="dimension" />
+        <attr name="additionalFrameTouchWidth" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="ChartView">
+        <attr name="chartLineWidth" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="ChartYAxisView" parent="ChartWithLegendView">
+        <attr name="chartLegendLineColor" />
+        <attr name="chartLegendLineToLabelMargin" />
+        <attr name="chartLegendYLineCount" />
+        <attr name="chartLegendLineWidth" />
+        <attr name="chartLegendLabelTextColor" />
+        <attr name="chartLegendLabelTextSize" />
+    </declare-styleable>
+
+    <declare-styleable name="ChartXAxisView" parent="ChartWithLegendView">
+        <attr name="chartLegendLabelTextSize" />
+        <attr name="chartLegendLabelTextColor" />
+        <attr name="chartLegendPaddingLeft" />
+        <attr name="chartLegendPaddingRight" />
+        <attr name="chartLegendXLabelMargin" />
+        <attr name="chartLegendXMarginTop" />
+    </declare-styleable>
+
+    <declare-styleable name="ChartControlThumbView" parent="ChartControlView">
+        <attr name="frameColor" />
+        <attr name="dimColor" />
+        <attr name="frameThicknessHorizontal" />
+        <attr name="frameThicknessVertical" />
+        <attr name="additionalFrameTouchWidth" />
+    </declare-styleable>
+
+</resources>
