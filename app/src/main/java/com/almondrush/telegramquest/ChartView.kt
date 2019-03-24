@@ -9,6 +9,7 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PointF
 import android.graphics.Rect
+import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.View
 import com.almondrush.dpToPx
@@ -46,6 +47,10 @@ class ChartView @JvmOverloads constructor(
         animatingLines.removeAll { !it.isAppearing }
     })
 
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        super.onRestoreInstanceState(state)
+    }
+
     init {
         context.theme.obtainStyledAttributes(attrs, R.styleable.ChartView, defStyleAttr, defStyleRes).apply {
             try {
@@ -61,6 +66,7 @@ class ChartView @JvmOverloads constructor(
             isAntiAlias = true
         }
     }
+
 
     fun setXRange(range: IntRange) {
         xRange = range

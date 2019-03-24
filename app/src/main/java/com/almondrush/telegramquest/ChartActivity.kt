@@ -28,7 +28,6 @@ class ChartActivity : AppCompatActivity() {
     private lateinit var controlView: ChartControlView
     private lateinit var chartLabels: ViewGroup
 
-    private var enabledLinesMap = mutableMapOf<Line, Boolean>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +41,7 @@ class ChartActivity : AppCompatActivity() {
             val extras = requireNotNull(intent.extras)
             extras.classLoader = this.classLoader
             val lines = extras.getParcelableArrayList<Line>(CHART_DATA_EXTRA)!!
-            State(lines)
+            State(XRange.MIN, XRange.MAX, lines.associateWith { true }.toMutableMap())
         }
 
         chartView = findViewById(R.id.chart_view)
@@ -50,29 +49,33 @@ class ChartActivity : AppCompatActivity() {
         chartLabels = findViewById(R.id.chart_line_names_layout)
 
         controlView.setListener(object: ChartControlView.XRangeUpdatedListener {
-            override fun onXRangeUpdated(timeRange: IntRange) {
-                chartView.setXRange(timeRange)
+            override fun onXRangeUpdated(xRange: IntRange) {
+                state.xRangeStart = xRange.start
+                state.xRangeEnd = xRange.endInclusive
+                chartView.setXRange(xRange)
             }
         })
 
-        setLines(state.chart)
+        setLines(state.lines.keys.toList())
+
+        val xRange = state.xRangeStart..state.xRangeEnd
+        controlView.setXRange(xRange)
     }
 
     private fun setLines(lines: List<Line>) {
-        enabledLinesMap = lines.associateWith { true }.toMutableMap()
         createLabels(lines)
         updateChild()
     }
 
     private fun updateChild() {
-        val lines = enabledLinesMap.mapNotNull { (line, isEnabled) -> if (isEnabled) line else null }
+        val lines = state.lines.mapNotNull { (line, isEnabled) -> if (isEnabled) line else null }
         chartView.setLines(lines)
         controlView.setLines(lines)
     }
 
     private fun onLabelClick(line: Line) {
-        val isEnabled = enabledLinesMap[line]!!
-        enabledLinesMap[line] = !isEnabled
+        val isEnabled = state.lines[line]!!
+        state.lines[line] = !isEnabled
         updateChild()
     }
 
@@ -89,14 +92,15 @@ class ChartActivity : AppCompatActivity() {
         val textView: TextView = view.findViewById(R.id.chart_label_text)
         val divider: View = view.findViewById(R.id.chart_label_divider)
 
-        checkBox.isChecked = enabledLinesMap[line]!!
+        checkBox.isChecked = state.lines[line]!!
+
         val states = arrayOf(intArrayOf(android.R.attr.state_checked), intArrayOf())
         val colors = intArrayOf(line.color, line.color)
         checkBox.buttonTintList = ColorStateList(states, colors)
         textView.text = line.name
         view.setOnRippleClickListener {
             onLabelClick(line)
-            checkBox.isChecked = enabledLinesMap[line]!!
+            checkBox.isChecked = state.lines[line]!!
         }
         divider.visibility = if (isDividerEnabled) View.VISIBLE else View.GONE
 
@@ -109,5 +113,9 @@ class ChartActivity : AppCompatActivity() {
     }
 
     @Parcelize
-    private data class State(var chart: List<Line>) : Parcelable
+    private data class State(
+        var xRangeStart: Int,
+        var xRangeEnd: Int,
+        var lines: MutableMap<Line, Boolean>
+    ) : Parcelable
 }

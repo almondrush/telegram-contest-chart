@@ -23,6 +23,10 @@ class ChartControlView @JvmOverloads constructor(
         addView(thumb)
     }
 
+    fun setXRange(xRange: IntRange) {
+        thumb.setXRange(xRange)
+    }
+
     fun setListener(listener: XRangeUpdatedListener) {
         thumb.xRangeUpdatedListener = listener
     }

@@ -32,7 +32,7 @@ internal class ChartControlThumbView @JvmOverloads constructor(
 
     internal var xRangeUpdatedListener: ChartControlView.XRangeUpdatedListener? = null
 
-    private var xRange by Delegates.observable(XRange.FULL) { _, oldValue, newValue ->
+    private var xRangeInternal by Delegates.observable(XRange.FULL) { _, oldValue, newValue ->
         if (oldValue != newValue) {
             updateXRangePx()
             xRangeUpdatedListener?.onXRangeUpdated(newValue)
@@ -70,14 +70,14 @@ internal class ChartControlThumbView @JvmOverloads constructor(
             }
     }
 
-    private fun setXRange(start: Int = xRange.start, end: Int = xRange.endInclusive) {
-        xRange = start..end
+    fun setXRange(xRange: IntRange) {
+        xRangeInternal = xRange
     }
 
     private fun updateXRangePx() {
         if (pixelsPerXRangeUnit == 0F) return
-        val start = (xRange.first * pixelsPerXRangeUnit).roundToInt()
-        val end = (xRange.endInclusive * pixelsPerXRangeUnit).roundToInt()
+        val start = (xRangeInternal.first * pixelsPerXRangeUnit).roundToInt()
+        val end = (xRangeInternal.endInclusive * pixelsPerXRangeUnit).roundToInt()
         xRangePixels = start..end
     }
 
@@ -100,8 +100,7 @@ internal class ChartControlThumbView @JvmOverloads constructor(
     private fun calculateAndSet(dxLeftThumb: Float, dxRightThumb: Float, allowResize: Boolean) {
         val (leftPosition, rightPosition) = calculatePositions(dxLeftThumb, dxRightThumb, allowResize)
         setXRange(
-            (leftPosition / pixelsPerXRangeUnit).roundToInt(),
-            (rightPosition / pixelsPerXRangeUnit).roundToInt()
+            (leftPosition / pixelsPerXRangeUnit).roundToInt()..(rightPosition / pixelsPerXRangeUnit).roundToInt()
         )
     }
 
@@ -214,9 +213,9 @@ internal class ChartControlThumbView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         outerRect.set(
-            drawingRect.width() * xRange.start / XRange.MAX,
+            drawingRect.width() * xRangeInternal.start / XRange.MAX,
             0F,
-            drawingRect.width() * xRange.endInclusive / XRange.MAX,
+            drawingRect.width() * xRangeInternal.endInclusive / XRange.MAX,
             drawingRect.bottom
         )
         innerRect.set(
