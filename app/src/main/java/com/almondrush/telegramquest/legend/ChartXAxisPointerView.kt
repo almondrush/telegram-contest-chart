@@ -6,6 +6,7 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import com.almondrush.dpToPx
 import com.almondrush.interval
 import com.almondrush.telegramquest.ChartUtil
 import com.almondrush.telegramquest.R
@@ -21,6 +22,10 @@ internal class ChartXAxisPointerView @JvmOverloads constructor(
     defStyleRes: Int = 0
 ) : View(context, attrs, defStyleAttr, defStyleRes) {
 
+    companion object {
+        private const val DP_Y_TO_STOP_TRACKING_TOUCH = 50
+    }
+
     var listener: Listener? = null
 
     private var lineColor: Int = 0
@@ -31,6 +36,8 @@ internal class ChartXAxisPointerView @JvmOverloads constructor(
 
     private var touchX: Float? = null
     private var isTouched = false
+    private var touchY: Float = 0F
+    private val pxYToStopTrackingTouch = DP_Y_TO_STOP_TRACKING_TOUCH.dpToPx(context)
 
     private val linePaint = Paint()
     private val pointPaint = Paint()
@@ -114,8 +121,16 @@ internal class ChartXAxisPointerView @JvmOverloads constructor(
                 touchX = event.x
                 isTouched = true
                 invalidate()
+                touchY = event.y
             }
             MotionEvent.ACTION_MOVE -> {
+                if (Math.abs(event.y - touchY) > pxYToStopTrackingTouch) {
+                    parent.requestDisallowInterceptTouchEvent(false)
+                    touchX = null
+                    invalidate()
+                    listener?.onSelectionRemoved()
+                    return false
+                }
                 touchX = event.x
                 invalidate()
             }
@@ -125,7 +140,6 @@ internal class ChartXAxisPointerView @JvmOverloads constructor(
                 invalidate()
                 listener?.onSelectionRemoved()
             }
-
         }
         return true
     }

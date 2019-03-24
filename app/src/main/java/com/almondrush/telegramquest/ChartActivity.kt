@@ -37,7 +37,6 @@ class ChartActivity : AppCompatActivity() {
             savedInstanceState.classLoader = this.classLoader
             savedInstanceState.getParcelable(STATE) as State
         } else {
-            L.d(intent.extras)
             val extras = requireNotNull(intent.extras)
             extras.classLoader = this.classLoader
             val lines = extras.getParcelableArrayList<Line>(CHART_DATA_EXTRA)!!

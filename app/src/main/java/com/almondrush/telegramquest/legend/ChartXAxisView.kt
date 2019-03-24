@@ -10,7 +10,6 @@ import android.view.View
 import com.almondrush.interval
 import com.almondrush.telegramquest.BuildConfig
 import com.almondrush.telegramquest.ChartUtil
-import com.almondrush.telegramquest.L
 import com.almondrush.telegramquest.R
 import com.almondrush.telegramquest.XRange
 import com.almondrush.textHeight
@@ -106,9 +105,7 @@ internal class ChartXAxisView @JvmOverloads constructor(
 
         textPaint.getTextBounds(LABEL_TEXT_TO_MEASURE, 0, LABEL_TEXT_TO_MEASURE.length - 1, measureRect)
 
-//        labelWidth = textPaint.measureText(LABEL_TEXT_TO_MEASURE)
         labelWidth = measureRect.width().toFloat()
-        L.d(labelWidth)
 
         setMeasuredDimension(
             getDefaultSize(suggestedMinimumWidth, widthMeasureSpec),

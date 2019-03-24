@@ -48,7 +48,6 @@ object DataParser {
 
     private fun parseX(key: String, chart: JSONObject): List<Long> {
         val column = findColumn(key, chart)
-        L.d(column.length())
         val xSeries = ArrayList<Long>(column.length() - 1)
 
         for (i in 1 until column.length()) {

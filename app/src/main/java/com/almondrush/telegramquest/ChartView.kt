@@ -47,10 +47,6 @@ class ChartView @JvmOverloads constructor(
         animatingLines.removeAll { !it.isAppearing }
     })
 
-    override fun onRestoreInstanceState(state: Parcelable?) {
-        super.onRestoreInstanceState(state)
-    }
-
     init {
         context.theme.obtainStyledAttributes(attrs, R.styleable.ChartView, defStyleAttr, defStyleRes).apply {
             try {
